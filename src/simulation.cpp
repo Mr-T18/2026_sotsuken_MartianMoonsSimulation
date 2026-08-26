@@ -37,6 +37,7 @@ int main() {
 
   double t = 0.0;
   const double OUTPUT_INTERVAL = 1e-3;  // 出力間隔[年]
+  // 2のn乗のタイムステップ幅を
   double next_output_time = 0.0;
   const double dt = physics::DT;  // 計算に用いるタイムステップ幅
 
@@ -65,7 +66,6 @@ int main() {
     t += physics::DT_YEARS;
 
     // 上の半ステップ幅のRK4で時刻に正しい位置と速度になったので，出力
-    // output_state(ofs, t, sat);
     write_binary_output(ofs, t, sat);
   }
 

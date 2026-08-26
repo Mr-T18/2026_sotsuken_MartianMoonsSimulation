@@ -68,6 +68,7 @@ const double z0 = 0.0;
 
 // 積分のパラメータ
 const double DT_YEARS = 1e-5;  // [年] (正規化してない方程式では年のままで使う)
+// 2^-nのタイムステップ幅を管理してみたらどうか
 const double DT =
     DT_YEARS * omega_K_yr;  // [無次元] (正規化した方程式での積分につかう) (DT =
                             // d\tilde{t})
