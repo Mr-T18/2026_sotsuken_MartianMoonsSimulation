@@ -3,6 +3,9 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #define DEG_TO_RAD(x) (x * M_PI / 180.0)
 #define RAD_TO_DEG(x) (x * 180.0 / M_PI)
@@ -67,7 +70,9 @@ const double y0 = 0.0;
 const double z0 = 0.0;
 
 // 積分のパラメータ
-const double DT_YEARS = 1e-5;  // [年] (正規化してない方程式では年のままで使う)
+const double DT_YEARS =
+    1.0 / 65536.0;  // [年] (正規化してない方程式では年のままで使う)
+// 2^-nのタイムステップ幅を管理してみたらどうか
 const double DT =
     DT_YEARS * omega_K_yr;  // [無次元] (正規化した方程式での積分につかう) (DT =
                             // d\tilde{t})
