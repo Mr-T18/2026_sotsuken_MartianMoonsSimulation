@@ -128,7 +128,8 @@ int main() {
 
       // 出力ファイルパスの作成
       std::ostringstream out_file_path;
-      out_file_path << dir_path.str() << "/run_" << std::setw(4)
+      out_file_path << dir_path.str() << "/v" << std::setw(3)
+                    << std::setfill('0') << v0_int << "_" << std::setw(4)
                     << std::setfill('0') << angle_id << ".bin";
       std::ofstream ofs(out_file_path.str(), std::ios::binary);
       if (!ofs) {
