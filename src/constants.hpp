@@ -78,6 +78,10 @@ const double DT =
                             // d\tilde{t})
 const double MAX_YEARS = 1000.0;
 
+// 無次元化した火星半径とその2乗．衝突判定に用いる
+const double r_M_norm = r_M / r_H;
+const double r_M_norm_sq = r_M_norm * r_M_norm;
+
 }  // namespace physics
 
 #endif

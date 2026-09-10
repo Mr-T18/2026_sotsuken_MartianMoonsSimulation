@@ -164,7 +164,7 @@ int main() {
           // 脱出判定． r > 2.0 r_H で脱出，もしくは火星に衝突したら打ち切り
           double r_sq =
               sat.r.x * sat.r.x + sat.r.y * sat.r.y + sat.r.z * sat.r.z;
-          if (r_sq > 4.0 || r_sq < physics::r_M * physics::r_M) {
+          if (r_sq > 4.0 || r_sq < physics::r_M_norm_sq) {
             terminated = true;
             break;
           }
