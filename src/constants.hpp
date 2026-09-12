@@ -76,7 +76,7 @@ const double DT_YEARS =
 const double DT =
     DT_YEARS * omega_K_yr;  // [無次元] (正規化した方程式での積分につかう) (DT =
                             // d\tilde{t})
-const double MAX_YEARS = 1000.0;
+const double MAX_YEARS = 10000.0;
 
 // 無次元化した火星半径とその2乗．衝突判定に用いる
 const double r_M_norm = r_M / r_H;
