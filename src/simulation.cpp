@@ -12,7 +12,7 @@
 #include "constants.hpp"
 #include "integrator.hpp"
 
-#define NUM_SAMPLES 10
+#define NUM_SAMPLES 4096
 #define ANGLES_CSV_PATH "data/angles_4096.csv"
 #define RESULT_CSV_PATH "out/result_summary.csv"
 
@@ -94,12 +94,11 @@ State init_state(const InitialAngle& angle, const double v0) {
 }
 
 // 1つのシミュレーションの結果(周回数，捕獲衝突or脱出)
-void record_csv(std::ofstream& ofs_all_summary,  // すべてのサマリーCSV
-                std::ofstream& ofs_v0_summary,   // それぞれのv0のサマリーCSV
-                const int id,                    // id
-                const InitialAngle& angle,       // 初期条件
-                const double v0,                 // 初速度
-                const int N,                     // 周回数
+void record_csv(std::ofstream& ofs_v0_summary,  // それぞれのv0のサマリーCSV
+                const int id,                   // id
+                const InitialAngle& angle,      // 初期条件
+                const double v0,                // 初速度
+                const int N,                    // 周回数
                 const int is_captured,  // 捕獲：0, L1から脱出：1, L2から脱出：2
                 const double year       // 最終時間
 ) {
@@ -116,11 +115,12 @@ void record_csv(std::ofstream& ofs_all_summary,  // すべてのサマリーCSV
     is_captured_str = "null";
   }
 
-  ofs_all_summary << std::fixed << std::setprecision(1) << std::setw(4)
-                  << std::setfill('0') << id << "," << v0 << ","
-                  << std::setprecision(15) << angle.phi << "," << angle.zeta
-                  << "," << N << "," << std::scientific << std::setprecision(15)
-                  << year << "," << is_captured_str << "\n";
+  // ofs_all_summary << std::fixed << std::setprecision(1) << std::setw(4)
+  //                 << std::setfill('0') << id << "," << v0 << ","
+  //                 << std::setprecision(15) << angle.phi << "," << angle.zeta
+  //                 << "," << N << "," << std::scientific <<
+  //                 std::setprecision(15)
+  //                 << year << "," << is_captured_str << "\n";
 
   ofs_v0_summary << std::fixed << std::setprecision(1) << std::setw(4)
                  << std::setfill('0') << id << "," << v0 << ","
@@ -145,16 +145,18 @@ int main() {
   }
 
   // すべての結果のサマリーCSVの作成
-  std::ofstream ofs_all_summary(RESULT_CSV_PATH);
-  if (!ofs_all_summary) {
-    std::cerr << "Error: Cannot open " << RESULT_CSV_PATH << std::endl;
-    return 1;
-  }
+  // std::ofstream ofs_all_summary(RESULT_CSV_PATH);
+  // if (!ofs_all_summary) {
+  //   std::cerr << "Error: Cannot open " << RESULT_CSV_PATH << std::endl;
+  //   return 1;
+  // }
   // ヘッダ行の記述
-  ofs_all_summary << "# ID,v0,phi0,zeta0,N,year,Capture/Escape/Survive" << "\n";
+  // ofs_all_summary << "# ID,v0,phi0,zeta0,N,year,Capture/Escape/Survive" <<
+  // "\n";
 
-  std::vector<double> v0_list = {20.0,  40.0,  60.0,  80.0,
-                                 100.0, 120.0, 140.0, 160.0};
+  // std::vector<double> v0_list = {20.0,  40.0,  60.0,  80.0,
+  //                                100.0, 120.0, 140.0, 160.0};
+  std::vector<double> v0_list = {40.0};
 
   std::cout << "Start Hill Simulation" << std::endl;
 
@@ -175,6 +177,10 @@ int main() {
     // ヘッダ行の記述
     ofs_v0_summary << "# ID,v0,phi0,zeta0,N,year,Capture/Escape/Survive"
                    << "\n";
+
+    // 進捗状況の出力
+    std::cout << "Running v0 = " << std::setw(3) << v0_int
+              << " m/s: " << std::flush;
 
     // 4096通り試す
     for (int angle_id = 0; angle_id < NUM_SAMPLES; angle_id++) {
@@ -243,8 +249,7 @@ int main() {
           prev1_r2 = current_r2;
 
           // 脱出判定． r > 2.0 r_H で脱出，もしくは火星に衝突したら打ち切り
-          double r_sq =
-              sat.r.x * sat.r.x + sat.r.y * sat.r.y + sat.r.z * sat.r.z;
+          double r_sq = sat.r.norm2();
           if (r_sq > 4.0) {  // 脱出
             terminated = true;
             if (sat.r.x > 0) {  // L2点からの脱出
@@ -252,10 +257,12 @@ int main() {
             } else {  // L1点からの脱出
               is_captured = 1;
             }
+            write_binary_output(ofs, t, sat);
             break;
           } else if (r_sq < physics::r_M_norm_sq) {  // 捕獲
             terminated = true;
             is_captured = 0;
+            write_binary_output(ofs, t, sat);
             break;
           }
         }
@@ -269,15 +276,43 @@ int main() {
         sat.v = rk4_step(sat, dt * 0.5);
         t += physics::DT_YEARS;
 
+        // 512ステップ目の周回数チェック
+        double current_r2 = sat.r.norm2();
+        if (prev1_r2 < prev2_r2 && prev1_r2 < current_r2) {
+          N++;
+        }
+        prev2_r2 = prev1_r2;
+        prev1_r2 = current_r2;
+
+        // 512ステップ目の打ち切り判定
+        double r_sq = sat.r.norm2();
+        if (r_sq > 4.0) {
+          is_captured = (sat.r.x > 0) ? 2 : 1;
+          write_binary_output(ofs, t, sat);
+          break;
+        } else if (r_sq < physics::r_M_norm_sq) {
+          is_captured = 0;
+          write_binary_output(ofs, t, sat);
+          break;
+        }
+
         // 上の半ステップ幅のRK4で時刻に正しい位置と速度になったので，出力
         write_binary_output(ofs, t, sat);
       }
-      record_csv(ofs_all_summary, ofs_v0_summary, angle_id, angles[angle_id],
-                 v0, N, is_captured, t);
+      record_csv(ofs_v0_summary, angle_id, angles[angle_id], v0, N, is_captured,
+                 t);
       // 明示的にディスクへ書き出す
-      ofs_all_summary.flush();
+      // ofs_all_summary.flush();
       ofs_v0_summary.flush();
+
+      // 1件終わるたびに行頭（または進捗部分）を上書き更新
+      std::cout << "\rRunning v0 = " << std::setw(3) << v0_int << " m/s: ["
+                << std::setw(4) << std::setfill(' ') << (angle_id + 1) << " / "
+                << NUM_SAMPLES << "] (" << std::fixed << std::setprecision(1)
+                << (100.0 * (angle_id + 1) / NUM_SAMPLES) << "%)" << std::flush;
     }
+    // 4096件すべて完了したら改行して次の速度へ
+    std::cout << " -> Done!" << std::endl;
   }
 
   std::cout << "Simulation Finish!" << std::endl;
