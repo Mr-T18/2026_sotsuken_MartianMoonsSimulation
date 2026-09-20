@@ -38,14 +38,14 @@ const double H =
 // Hill半径
 const double r_H =
     MARS_SEMI_MAJOR_AXIS * std::pow(M_mars / (3.0 * M_sun), 1.0 / 3.0);
-// 火星のケプラー角速度 omega_K
+// 火星のケプラー角速度 omega_K [rad/sec]
 const double omega_K = std::sqrt(G * M_sun / std::pow(MARS_SEMI_MAJOR_AXIS, 3));
 // 速度のスケール係数
 const double v_scale = r_H * omega_K;
 
 // タイムスケール
 const double SEC_PER_YEAR = 365.25 * 24.0 * 3600.0;  // 1年（秒）
-// omega_K(火星のケプラー角速度)で正規化した年の単位．
+// 単位年あたりの火星のケプラー角速度 [rad/yr]．
 const double omega_K_yr = omega_K * SEC_PER_YEAR;
 
 // シミュレーションの初期条件
@@ -81,6 +81,10 @@ const double MAX_YEARS = 10000.0;
 // 無次元化した火星半径とその2乗．衝突判定に用いる
 const double r_M_norm = r_M / r_H;
 const double r_M_norm_sq = r_M_norm * r_M_norm;
+
+// 火星の赤道バルジパラメータ
+const double J2 = 0.001955;
+const double martian_obliquity = 25.0;
 
 }  // namespace physics
 

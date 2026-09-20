@@ -2,3 +2,7 @@ out/*
 !out/.gitkeep
 figures/*
 !figures/.gitkeep
+gas-drag/*
+!gas-drag/.gitkeep
+bulge/*
+!bulge/.gitkeep

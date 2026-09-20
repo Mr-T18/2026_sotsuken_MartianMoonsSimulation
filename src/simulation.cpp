@@ -14,7 +14,7 @@
 
 #define NUM_SAMPLES 4096
 #define ANGLES_CSV_PATH "data/angles_4096.csv"
-#define RESULT_CSV_PATH "out/result_summary.csv"
+#define RESULT_CSV_PATH "bulge/out/result_summary.csv"
 
 // 角度パラメータを保持する構造体
 struct InitialAngle {
@@ -115,13 +115,6 @@ void record_csv(std::ofstream& ofs_v0_summary,  // それぞれのv0のサマリ
     is_captured_str = "null";
   }
 
-  // ofs_all_summary << std::fixed << std::setprecision(1) << std::setw(4)
-  //                 << std::setfill('0') << id << "," << v0 << ","
-  //                 << std::setprecision(15) << angle.phi << "," << angle.zeta
-  //                 << "," << N << "," << std::scientific <<
-  //                 std::setprecision(15)
-  //                 << year << "," << is_captured_str << "\n";
-
   ofs_v0_summary << std::fixed << std::setprecision(1) << std::setw(4)
                  << std::setfill('0') << id << "," << v0 << ","
                  << std::setprecision(15) << angle.phi << "," << angle.zeta
@@ -144,16 +137,6 @@ int main() {
     return 1;
   }
 
-  // すべての結果のサマリーCSVの作成
-  // std::ofstream ofs_all_summary(RESULT_CSV_PATH);
-  // if (!ofs_all_summary) {
-  //   std::cerr << "Error: Cannot open " << RESULT_CSV_PATH << std::endl;
-  //   return 1;
-  // }
-  // ヘッダ行の記述
-  // ofs_all_summary << "# ID,v0,phi0,zeta0,N,year,Capture/Escape/Survive" <<
-  // "\n";
-
   // std::vector<double> v0_list = {20.0,  40.0,  60.0,  80.0,
   //                                100.0, 120.0, 140.0, 160.0};
   std::vector<double> v0_list = {40.0};
@@ -166,8 +149,8 @@ int main() {
 
     // それぞれの初速度のサマリーcsvを作成
     std::ostringstream v0summary_csv_path;
-    v0summary_csv_path << "out/v" << std::setw(3) << std::setfill('0') << v0_int
-                       << ".csv";
+    v0summary_csv_path << "bulge/out/v" << std::setw(3) << std::setfill('0')
+                       << v0_int << ".csv";
     std::ofstream ofs_v0_summary(v0summary_csv_path.str());
     if (!ofs_v0_summary) {
       std::cerr << "Error: Cannot open " << v0summary_csv_path.str()
@@ -187,8 +170,8 @@ int main() {
       // 出力ディレクトリパスの作成と存在確認（無ければ自動生成）
       int sub_dir = angle_id / 1024;
       std::ostringstream dir_path;
-      dir_path << "out/v" << std::setw(3) << std::setfill('0') << v0_int << "/"
-               << std::setw(2) << std::setfill('0') << sub_dir;
+      dir_path << "bulge/out/v" << std::setw(3) << std::setfill('0') << v0_int
+               << "/" << std::setw(2) << std::setfill('0') << sub_dir;
       // 新しいサブディレクトリの作成．1024の倍数のときのみ．
       if (angle_id % 1024 == 0) {
         std::filesystem::create_directories(dir_path.str());
