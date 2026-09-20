@@ -84,7 +84,7 @@ const double r_M_norm_sq = r_M_norm * r_M_norm;
 
 // 火星の赤道バルジパラメータ
 const double J2 = 0.001955;
-const double martian_obliquity = 25.0;
+const double obliquity = DEG_TO_RAD(25.0);
 
 }  // namespace physics
 

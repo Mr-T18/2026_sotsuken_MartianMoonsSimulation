@@ -24,7 +24,18 @@ struct Vec3 {
     double n = norm();
     return n * n * n;
   }
+  // 内積：スカラー
+  double dot(const Vec3& o) const { return x * o.x + y * o.y + z * o.z; }
+
+  // 外積：ベクトル
+  Vec3 cross(const Vec3& o) const {
+    return {y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x};
+  }
 };
+
+inline double dot(const Vec3& a, const Vec3& b) { return a.dot(b); }
+
+inline Vec3 cross(const Vec3& a, const Vec3& b) { return a.cross(b); }
 
 struct State {
   Vec3 r;  // 位置ベクトル
@@ -48,6 +59,31 @@ inline Vec3 get_drag_acceleration(const Vec3& r, const Vec3& v) {
 
   // 加速度ベクトルを返す
   return v * (C_norm * v_norm);
+}
+
+// 運動方程式の火星赤道バルジの項を得る
+inline Vec3 get_bulge_acceleration(const Vec3& r,  // 微惑星の位置ベクトル
+                                   const double& t_norm,  // 正規化された時間
+                                   const double& obl  // 火星の自転軸傾斜角[rad]
+) {
+  double K = 4.5 * physics::J2 * (physics::r_M / physics::r_H) *
+             (physics::r_M / physics::r_H);  // 赤道バルジの項にかかる係数
+  Vec3 spin_axis = {std::sin(obl) * std::cos(-t_norm),
+                    std::sin(obl) * std::sin(-t_norm),
+                    std::cos(obl)};  // 火星の自転軸の単位ベクトル
+
+  double r2 = r.norm2();       // r^2
+  double r5 = r.norm3() * r2;  // r^5
+
+  double S = dot(r, spin_axis);
+  double factor = (5.0 * S * S / r2 - 1.0);
+
+  Vec3 a_bulge;
+  a_bulge.x = K / r5 * (factor * r.x - 2.0 * S * spin_axis.x);
+  a_bulge.y = K / r5 * (factor * r.y - 2.0 * S * spin_axis.y);
+  a_bulge.z = K / r5 * (factor * r.z - 2.0 * S * spin_axis.z);
+
+  return a_bulge;
 }
 
 // 潮汐力・遠心力・重力を含めた保存力の項を返す
@@ -75,17 +111,25 @@ inline Vec3 rk4_step(const State& state, double dt) {
   return state.v + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
 }
 
-inline State leapfrog_step(const State& current, double dt) {
+inline State leapfrog_step(const State& current, const double& dt,
+                           const double& t_yr, const double& obl) {
   double dt_half = dt * 0.5;
+  double t_norm =
+      t_yr * physics::omega_K_yr;  // 正規化された時間t = omega_K * t_yr
 
   // 現在の位置での重力を計算
   Vec3 g_current = get_gravity_acceleration(current.r);
 
+  // 赤道バルジによる力を計算
+  Vec3 a_bulge_current = get_bulge_acceleration(current.r, t_norm, obl);
+
   // First Kick:
   // コリオリ力を含めて速度をdt/2更新．コリオリ力は既知なので，陰的に解くことができる
-  Vec3 v_half = {current.v.x + dt_half * (g_current.x + 2.0 * current.v.y),
-                 current.v.y + dt_half * (g_current.y - 2.0 * current.v.x),
-                 current.v.z + dt_half * g_current.z};
+  Vec3 v_half = {current.v.x + dt_half * (g_current.x + 2.0 * current.v.y +
+                                          a_bulge_current.x),
+                 current.v.y + dt_half * (g_current.y - 2.0 * current.v.x +
+                                          a_bulge_current.y),
+                 current.v.z + dt_half * (g_current.z + a_bulge_current.z)};
 
   // Full Drift: 位置の更新
   State next;
@@ -95,13 +139,15 @@ inline State leapfrog_step(const State& current, double dt) {
   // コリオリ力は速度依存で既知ではないので，行列の式変形をして，なんとか陰的に解く
   // 新しい位置での重力加速度の計算
   Vec3 g_next = get_gravity_acceleration(next.r);
-  double Ax = v_half.x + dt_half * g_next.x;
-  double Ay = v_half.y + dt_half * g_next.y;
+  Vec3 a_bulge_next = get_bulge_acceleration(next.r, t_norm + dt, obl);
+  Vec3 g_total_next = g_next + a_bulge_next;
+  double Ax = v_half.x + dt_half * g_total_next.x;
+  double Ay = v_half.y + dt_half * g_total_next.y;
   double denom = 1.0 / (1.0 + dt * dt);
 
   next.v.x = (Ax + dt * Ay) * denom;
   next.v.y = (Ay - dt * Ax) * denom;
-  next.v.z = v_half.z + dt_half * g_next.z;
+  next.v.z = v_half.z + dt_half * g_total_next.z;
 
   return next;
 }

@@ -12,9 +12,9 @@
 #include "constants.hpp"
 #include "integrator.hpp"
 
-#define NUM_SAMPLES 4096
+#define NUM_SAMPLES 2
 #define ANGLES_CSV_PATH "data/angles_4096.csv"
-#define RESULT_CSV_PATH "bulge/out/result_summary.csv"
+#define RESULT_CSV_PATH "result/bulge/out/result_summary.csv"
 
 // 角度パラメータを保持する構造体
 struct InitialAngle {
@@ -139,7 +139,7 @@ int main() {
 
   // std::vector<double> v0_list = {20.0,  40.0,  60.0,  80.0,
   //                                100.0, 120.0, 140.0, 160.0};
-  std::vector<double> v0_list = {40.0};
+  std::vector<double> v0_list = {20.0};
 
   std::cout << "Start Hill Simulation" << std::endl;
 
@@ -149,8 +149,8 @@ int main() {
 
     // それぞれの初速度のサマリーcsvを作成
     std::ostringstream v0summary_csv_path;
-    v0summary_csv_path << "bulge/out/v" << std::setw(3) << std::setfill('0')
-                       << v0_int << ".csv";
+    v0summary_csv_path << "result/bulge/out/v" << std::setw(3)
+                       << std::setfill('0') << v0_int << ".csv";
     std::ofstream ofs_v0_summary(v0summary_csv_path.str());
     if (!ofs_v0_summary) {
       std::cerr << "Error: Cannot open " << v0summary_csv_path.str()
@@ -170,8 +170,8 @@ int main() {
       // 出力ディレクトリパスの作成と存在確認（無ければ自動生成）
       int sub_dir = angle_id / 1024;
       std::ostringstream dir_path;
-      dir_path << "bulge/out/v" << std::setw(3) << std::setfill('0') << v0_int
-               << "/" << std::setw(2) << std::setfill('0') << sub_dir;
+      dir_path << "result/bulge/out/v" << std::setw(3) << std::setfill('0')
+               << v0_int << "/" << std::setw(2) << std::setfill('0') << sub_dir;
       // 新しいサブディレクトリの作成．1024の倍数のときのみ．
       if (angle_id % 1024 == 0) {
         std::filesystem::create_directories(dir_path.str());
@@ -218,7 +218,7 @@ int main() {
         // 正確には，次の出力時刻の1ステップ前まで繰り返す
         while (t + physics::DT_YEARS < next_output_time - 1e-9) {
           // 全ステップ
-          sat = leapfrog_step(sat, dt);
+          sat = leapfrog_step(sat, dt, t, physics::obliquity);
           sat.v = rk4_step(sat, dt);
           t += physics::DT_YEARS;
 
@@ -255,7 +255,7 @@ int main() {
         }
 
         // 最終半ステップ
-        sat = leapfrog_step(sat, dt);
+        sat = leapfrog_step(sat, dt, t, physics::obliquity);
         sat.v = rk4_step(sat, dt * 0.5);
         t += physics::DT_YEARS;
 
