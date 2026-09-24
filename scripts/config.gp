@@ -27,6 +27,5 @@ r_O(x, y, z) = sqrt(x**2 + y**2 + z**2)
 
 set terminal pngcairo size 800,800 enhanced font 'MS Gothic,11'
 
-set size square
 set grid
 set angle degrees
