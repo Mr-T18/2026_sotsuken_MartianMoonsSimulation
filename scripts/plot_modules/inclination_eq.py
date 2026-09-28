@@ -7,13 +7,15 @@ RH_OVER_RM = 319.1632070652
 def get_gnuplot_script(bin_path: Path, png_path: Path) -> str:
     bin_str = bin_path.as_posix()
     png_str = png_path.as_posix()
-    title_label = f"inclination {bin_path.parent.name}/{bin_path.stem}"
+    title_label = f"{bin_path.parent.name}/{bin_path.stem}"
 
     config_path = (Path.cwd() / "scripts/config.gp").resolve().as_posix()
 
     return f"""\
 load "{config_path}"
+set terminal pngcairo size 900,600 font 'Arial,10'
 set output "{png_str}"
+
 set xrange [0:50]
 set yrange [0:35]
 
@@ -36,9 +38,19 @@ hy(x, z, vx, vz) = z*vx - x*vz
 hz(x, y, vx, vy) = x*vy - y*vx
 h_norm(x, y, z, vx, vy, vz) = sqrt(hx(y,z,vy,vz)**2 + hy(x,z,vx,vz)**2 + hz(x,y,vx,vy)**2)
 
-clamp(v) = (v > 1.0) ? 1.0 : ((v < -1.0) ? -1.0 : v)
-cos_i(x, y, z, vx, vy, vz) = (h_norm(x,y,z,vx,vy,vz) > 1e-12) ? clamp(hz(x,y,vx,vy) / h_norm(x,y,z,vx,vy,vz)) : 1/0
-inc_deg(x, y, z, vx, vy, vz) = acos(cos_i(x,y,z,vx,vy,vz)) * 180.0 / pi
+phi = 25.0 * pi / 180.0
+SEC_PER_YEAR = 365.25 * 24.0 * 3600.0
+omegaK = sqrt(G * MS / (MARS_SEMI_MAJOR_AXIS ** 3))
+theta(t) = - omegaK * (t * SEC_PER_YEAR)
 
-plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" title "Points"
+sx(t) = sin(phi) * cos(theta(t))
+sy(t) = sin(phi) * sin(theta(t))
+sz = cos(phi)
+
+clamp(v) = (v > 1.0) ? 1.0 : ((v < -1.0) ? -1.0 : v)
+cos_i(t, x, y, z, vx, vy, vz) = (h_norm(x,y,z,vx,vy,vz) > 1e-12) ? \
+    clamp(dot(hx(y,z,vy,vz), hy(x,z,vx,vz), hz(x,y,vx,vy), sx(t), sy(t), sz) / h_norm(x,y,z,vx,vy,vz)) : 1/0
+inc_deg(t, x, y, z, vx, vy, vz) = acos(cos_i(t, x, y, z, vx, vy, vz)) * 180.0 / pi
+
+plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" title "Points"
 """
