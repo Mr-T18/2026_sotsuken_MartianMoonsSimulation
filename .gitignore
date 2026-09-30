@@ -4,3 +4,4 @@ figures/*
 !figures/.gitkeep
 result/*
 !result/.gitkeep
+scripts/plot_modules/__pycache__

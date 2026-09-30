@@ -115,7 +115,7 @@ inline State leapfrog_step(const State& current, const double& dt,
                            const double& t_yr, const double& obl) {
   double dt_half = dt * 0.5;
   double t_norm =
-      t_yr * physics::omega_K_yr;  // 正規化された時間t = omega_K * t_yr
+      t_yr * physics::omega_K_per_yr;  // 正規化された時間t = omega_K * t_yr
 
   // 現在の位置での重力を計算
   Vec3 g_current = get_gravity_acceleration(current.r);

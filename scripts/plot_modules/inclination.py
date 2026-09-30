@@ -23,7 +23,6 @@ set angles radians
 set xlabel "Distance from Mars center r [r_M]"
 set ylabel "Orbital Inclination i [deg]"
 set title "{title_label}" noenhanced
-set key outside right top
 
 set arrow from 1.0, 0 to 1.0, 180 nohead lc rgb "#cc0000" dt 2 lw 1
 set arrow from 0, 90 to 50, 90 nohead lc rgb "#888888" dt 2 lw 1

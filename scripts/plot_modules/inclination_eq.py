@@ -39,9 +39,7 @@ hz(x, y, vx, vy) = x*vy - y*vx
 h_norm(x, y, z, vx, vy, vz) = sqrt(hx(y,z,vy,vz)**2 + hy(x,z,vx,vz)**2 + hz(x,y,vx,vy)**2)
 
 phi = 25.0 * pi / 180.0
-SEC_PER_YEAR = 365.25 * 24.0 * 3600.0
-omegaK = sqrt(G * MS / (MARS_SEMI_MAJOR_AXIS ** 3))
-theta(t) = - omegaK * (t * SEC_PER_YEAR)
+theta(t) = - omegaK * (t * SEC_PER_YEAR) # Hill座標系における火星の自転軸傾斜角
 
 sx(t) = sin(phi) * cos(theta(t))
 sy(t) = sin(phi) * sin(theta(t))

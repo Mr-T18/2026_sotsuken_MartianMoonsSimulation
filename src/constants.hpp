@@ -46,7 +46,7 @@ const double v_scale = r_H * omega_K;
 // タイムスケール
 const double SEC_PER_YEAR = 365.25 * 24.0 * 3600.0;  // 1年（秒）
 // 単位年あたりの火星のケプラー角速度 [rad/yr]．
-const double omega_K_yr = omega_K * SEC_PER_YEAR;
+const double omega_K_per_yr = omega_K * SEC_PER_YEAR;
 
 // シミュレーションの初期条件
 const double v0_m_s = 20.0;
@@ -74,8 +74,8 @@ const double DT_YEARS =
     1.0 / 65536.0;  // [年] (正規化してない方程式では年のままで使う)
 // 2^-nのタイムステップ幅を管理してみたらどうか
 const double DT =
-    DT_YEARS * omega_K_yr;  // [無次元] (正規化した方程式での積分につかう) (DT =
-                            // d\tilde{t})
+    DT_YEARS * omega_K_per_yr;  // [無次元] (正規化した方程式での積分につかう)
+                                // (DT = d\tilde{t})
 const double MAX_YEARS = 10000.0;
 
 // 無次元化した火星半径とその2乗．衝突判定に用いる

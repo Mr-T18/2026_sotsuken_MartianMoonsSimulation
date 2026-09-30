@@ -10,6 +10,9 @@ rM = 3396.2e3 # 火星赤道半径 [m]
 MARS_SEMI_MAJOR_AXIS = 1.52368 * AU # 火星の軌道長半径[m]
 rH = MARS_SEMI_MAJOR_AXIS * (MM / (3 * MS))**(1.0/3.0) # Hill半径[m]
 
+SEC_PER_YEAR = 365.25 * 24.0 * 3600.0
+omegaK = sqrt(G * MS / (MARS_SEMI_MAJOR_AXIS ** 3))
+
 # 関数だ
 # Hill半径から火星半径の単位変換
 rH_to_rM(x) = (x * rH) / rM
