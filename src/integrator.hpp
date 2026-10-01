@@ -1,9 +1,10 @@
-#ifndef INTEGRATOR
-#define INTEGRATOR
+#ifndef INTEGRATOR_HPP
+#define INTEGRATOR_HPP
 #define _USE_MATH_DEFINES
 #include <cmath>
 
 #include "constants.hpp"
+#include "parameter.hpp"
 
 // 3次元ベクトル
 struct Vec3 {
@@ -44,13 +45,14 @@ struct State {
 
 // ガス抵抗のみの影響を受けたとして運動方程式を解く
 // 位置と速度から加速度を求めるため，引数はstate
-inline Vec3 get_drag_acceleration(const Vec3& r, const Vec3& v) {
+inline Vec3 get_drag_acceleration(const Vec3& r, const Vec3& v,
+                                  const Parameter& param) {
   double r_norm = r.norm();
 
   // 火星からの距離によって変化するガス密度．正規化した距離の計算ではないので，距離rにr_Hを掛けている
-  double rho_atm =
-      physics::rho_neb *
-      exp((physics::H / (r_norm * physics::r_H)) - (physics::H / physics::r_H));
+  double rho_nebula = param.rho_neb;
+  double rho_atm = rho_nebula * exp((physics::H / (r_norm * physics::r_H)) -
+                                    (physics::H / physics::r_H));
 
   // ガス抵抗計算のための速度にかかる比例係数
   double C_norm =
@@ -62,12 +64,14 @@ inline Vec3 get_drag_acceleration(const Vec3& r, const Vec3& v) {
 }
 
 // 運動方程式の火星赤道バルジの項を得る
-inline Vec3 get_bulge_acceleration(const Vec3& r,  // 微惑星の位置ベクトル
-                                   const double& t_norm,  // 正規化された時間
-                                   const double& obl  // 火星の自転軸傾斜角[rad]
+inline Vec3 get_bulge_acceleration(
+    const Vec3& r,          // 微惑星の位置ベクトル
+    const double& t_norm,   // 正規化された時間
+    const Parameter& param  // 火星の自転軸傾斜角[rad]
 ) {
   double K = 4.5 * physics::J2 * (physics::r_M / physics::r_H) *
              (physics::r_M / physics::r_H);  // 赤道バルジの項にかかる係数
+  double obl = param.obl;
   Vec3 spin_axis = {std::sin(obl) * std::cos(-t_norm),
                     std::sin(obl) * std::sin(-t_norm),
                     std::cos(obl)};  // 火星の自転軸の単位ベクトル
@@ -88,7 +92,7 @@ inline Vec3 get_bulge_acceleration(const Vec3& r,  // 微惑星の位置ベク�
 
 // 潮汐力・遠心力・重力を含めた保存力の項を返す
 // ただし，速度依存のコリオリ力項は含めない
-inline Vec3 get_gravity_acceleration(const Vec3& r) {
+inline Vec3 get_gravity_acceleration(const Vec3& r, const Parameter& param) {
   double r3 = r.norm3();
 
   // 火星中心重力
@@ -101,27 +105,27 @@ inline Vec3 get_gravity_acceleration(const Vec3& r) {
 }
 
 // RK4ではガス抗力項のみ計算するが，更新するのは加速度(による速度)のみ
-inline Vec3 rk4_step(const State& state, double dt) {
-  Vec3 k1 = get_drag_acceleration(state.r, state.v);
-  Vec3 k2 = get_drag_acceleration(state.r, state.v + k1 * (0.5 * dt));
-  Vec3 k3 = get_drag_acceleration(state.r, state.v + k2 * (0.5 * dt));
-  Vec3 k4 = get_drag_acceleration(state.r, state.v + k3 * dt);
+inline Vec3 rk4_step(const State& state, double dt, const Parameter& param) {
+  Vec3 k1 = get_drag_acceleration(state.r, state.v, param);
+  Vec3 k2 = get_drag_acceleration(state.r, state.v + k1 * (0.5 * dt), param);
+  Vec3 k3 = get_drag_acceleration(state.r, state.v + k2 * (0.5 * dt), param);
+  Vec3 k4 = get_drag_acceleration(state.r, state.v + k3 * dt, param);
 
   // 戻り値：{ax, ay, az}
   return state.v + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
 }
 
 inline State leapfrog_step(const State& current, const double& dt,
-                           const double& t_yr, const double& obl) {
+                           const double& t_yr, const Parameter& param) {
   double dt_half = dt * 0.5;
   double t_norm =
       t_yr * physics::omega_K_per_yr;  // 正規化された時間t = omega_K * t_yr
 
   // 現在の位置での重力を計算
-  Vec3 g_current = get_gravity_acceleration(current.r);
+  Vec3 g_current = get_gravity_acceleration(current.r, param);
 
   // 赤道バルジによる力を計算
-  Vec3 a_bulge_current = get_bulge_acceleration(current.r, t_norm, obl);
+  Vec3 a_bulge_current = get_bulge_acceleration(current.r, t_norm, param);
 
   // First Kick:
   // コリオリ力を含めて速度をdt/2更新．コリオリ力は既知なので，陰的に解くことができる
@@ -138,8 +142,8 @@ inline State leapfrog_step(const State& current, const double& dt,
   // Second Kick: 新しい位置での速度の更新
   // コリオリ力は速度依存で既知ではないので，行列の式変形をして，なんとか陰的に解く
   // 新しい位置での重力加速度の計算
-  Vec3 g_next = get_gravity_acceleration(next.r);
-  Vec3 a_bulge_next = get_bulge_acceleration(next.r, t_norm + dt, obl);
+  Vec3 g_next = get_gravity_acceleration(next.r, param);
+  Vec3 a_bulge_next = get_bulge_acceleration(next.r, t_norm + dt, param);
   Vec3 g_total_next = g_next + a_bulge_next;
   double Ax = v_half.x + dt_half * g_total_next.x;
   double Ay = v_half.y + dt_half * g_total_next.y;

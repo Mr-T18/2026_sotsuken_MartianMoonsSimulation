@@ -1,19 +1,5 @@
-#include <cmath>
-#include <filesystem>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <vector>
-
-#include "constants.hpp"
-#include "integrator.hpp"
-
-#define ANGLES_CSV_PATH "result/gas-drag_capture.csv"
-#define RESULT_CSV_PATH "result/bulge/out/result_summary.csv"
+#ifndef SIMULATION_HPP
+#define SIMULATION_HPP
 
 // 角度パラメータを保持する構造体
 struct InitialAngle {
@@ -44,49 +30,6 @@ void output_state(std::ofstream& ofs, double t, const State& sat) {
   ofs << std::scientific << std::setprecision(15) << t << " " << sat.r.x << " "
       << sat.r.y << " " << sat.r.z << " " << sat.v.x << " " << sat.v.y << " "
       << sat.v.z << "\n";
-}
-
-// gas-drag_capture.csv を読み込んで std::vector に格納する関数
-std::vector<CaptureCase> load_capture_cases(const std::string& filepath) {
-  std::vector<CaptureCase> cases;
-
-  std::ifstream ifs(filepath);
-  if (!ifs.is_open()) {
-    throw std::runtime_error("Error: Could not open file: " + filepath);
-  }
-
-  std::string line;
-  while (std::getline(ifs, line)) {
-    // 空行やコメント行，ヘッダ行のスキップ
-    if (line.empty() || line[0] == '#' ||
-        line.find("v0") != std::string::npos) {
-      continue;
-    }
-
-    std::stringstream ss(line);
-    std::string item;
-    CaptureCase entry{};
-
-    // 1列目: v0
-    if (!std::getline(ss, item, ',')) continue;
-    entry.v0 = std::stod(item);
-
-    // 2列目: id
-    if (!std::getline(ss, item, ',')) continue;
-    entry.angle.id = std::stoi(item);
-
-    // 3列目: phi
-    if (!std::getline(ss, item, ',')) continue;
-    entry.angle.phi = std::stod(item);
-
-    // 4列目: zeta
-    if (!std::getline(ss, item, ',')) continue;
-    entry.angle.zeta = std::stod(item);
-
-    cases.push_back(entry);
-  }
-
-  return cases;
 }
 
 State init_state(const InitialAngle& angle, const double v0) {
@@ -130,30 +73,32 @@ void record_csv(std::ofstream& result_summary,  // サマリーCSV
                  << year << "," << is_captured_str << "\n";
 }
 
-int main() {
+void simulate(const std::vector<CaptureCase>& capture_cases,
+              const Parameter& param, std::ostringstream& output_dirname,
+              std::ofstream& v0_summary_csv) {
   const double OUTPUT_INTERVAL = 1.0 / 128.0;  // 出力間隔[年]
   const double dt = physics::DT;               // 計算に用いるタイムステップ幅
 
-  std::vector<CaptureCase> capture_cases;
-  try {
-    capture_cases = load_capture_cases(ANGLES_CSV_PATH);
-    std::cout << "Successfully loaded " << capture_cases.size()
-              << " angle configurations." << std::endl;
-  } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return 1;
-  }
+  // std::vector<CaptureCase> capture_cases;
+  // try {
+  //   capture_cases = load_capture_cases(ANGLES_CSV_PATH);
+  //   std::cout << "Successfully loaded " << capture_cases.size()
+  //             << " angle configurations." << std::endl;
+  // } catch (const std::exception& e) {
+  //   std::cerr << e.what() << std::endl;
+  //   return 1;
+  // }
 
-  std::cout << "Start Hill Simulation" << std::endl;
+  // std::cout << "Start Hill Simulation" << std::endl;
 
-  std::filesystem::create_directories("result/bulge/out");
-  std::ofstream result_summary(RESULT_CSV_PATH);
-  if (!result_summary) {
-    std::cerr << "Error: Cannot open " << RESULT_CSV_PATH << std::endl;
-    return 1;
-  }
-  // ヘッダ行の記述
-  result_summary << "# ID,v0,phi0,zeta0,N,year,Capture/Escape/Survive\n";
+  // std::filesystem::create_directories("result/bulge/out");
+  // std::ofstream result_summary(RESULT_CSV_PATH);
+  // if (!result_summary) {
+  //   std::cerr << "Error: Cannot open " << RESULT_CSV_PATH << std::endl;
+  //   return 1;
+  // }
+  // // ヘッダ行の記述
+  // result_summary << "# ID,v0,phi0,zeta0,N,year,Capture/Escape/Survive\n";
 
   int terminated_num = 0;
 
@@ -166,8 +111,9 @@ int main() {
     // 出力ディレクトリパスの作成と存在確認（無ければ自動生成）
     int sub_dir = angle_id / 1024;
     std::ostringstream dir_path;
-    dir_path << "result/bulge/out/v" << std::setw(3) << std::setfill('0')
-             << v0_int << "/" << std::setw(2) << std::setfill('0') << sub_dir;
+    dir_path << output_dirname.str() << "/v" << std::setw(3)
+             << std::setfill('0') << v0_int << "/" << std::setw(2)
+             << std::setfill('0') << sub_dir;
     if (!std::filesystem::exists(dir_path.str())) {
       std::filesystem::create_directories(dir_path.str());
     }
@@ -207,14 +153,14 @@ int main() {
           std::min(t + OUTPUT_INTERVAL, physics::MAX_YEARS);
 
       // 最初に半ステップのガス抗力項RK4
-      sat.v = rk4_step(sat, dt * 0.5);
+      sat.v = rk4_step(sat, dt * 0.5, param);
 
       // 出力時刻が来るまで，全ステップ幅で計算する
       // 正確には，次の出力時刻の1ステップ前まで繰り返す
       while (t + physics::DT_YEARS < next_output_time - 1e-9) {
         // 全ステップ
-        sat = leapfrog_step(sat, dt, t, physics::obliquity);
-        sat.v = rk4_step(sat, dt);
+        sat = leapfrog_step(sat, dt, t, param);
+        sat.v = rk4_step(sat, dt, param);
         t += physics::DT_YEARS;
 
         // 周回数のカウント
@@ -251,8 +197,8 @@ int main() {
       }
 
       // 最終半ステップ
-      sat = leapfrog_step(sat, dt, t, physics::obliquity);
-      sat.v = rk4_step(sat, dt * 0.5);
+      sat = leapfrog_step(sat, dt, t, param);
+      sat.v = rk4_step(sat, dt * 0.5, param);
       t += physics::DT_YEARS;
 
       // 512ステップ目の周回数チェック
@@ -278,17 +224,16 @@ int main() {
       // 上の半ステップ幅のRK4で時刻に正しい位置と速度になったので，出力
       write_binary_output(ofs, t, sat);
     }
-    record_csv(result_summary, angle_id, cc.angle, cc.v0, N, is_captured, t);
+    record_csv(v0_summary_csv, angle_id, cc.angle, cc.v0, N, is_captured, t);
     // 明示的にディスクへ書き出す
-    result_summary.flush();
+    v0_summary_csv.flush();
 
     // 1件終わるたびに行頭（または進捗部分）を上書き更新
-    std::cout << "\rRunning v0 = " << std::setw(3) << v0_int
-              << " m/s, ID=" << std::setw(4) << std::setfill('0') << angle_id
-              << ", COMPLETE: " << terminated_num << std::flush;
+    // std::cout << "\rRunning v0 = " << std::setw(3) << v0_int
+    //           << " m/s, ID=" << std::setw(4) << std::setfill('0') << angle_id
+    //           << ", COMPLETE: " << terminated_num << std::flush;
   }
-  std::cout << " -> Done!" << std::endl;
-
-  std::cout << "Simulation Finish!" << std::endl;
-  return 0;
+  return;
 }
+
+#endif
