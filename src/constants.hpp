@@ -18,6 +18,7 @@ const double M_mars = 6.42e23;     // 火星質量 [kg]
 const double M_sat = 1.06e16;      // 衛星質量 [kg]
 const double AU = 1.495978707e11;  // 天文単位 [m]
 const double r_M = 3396.2e3;       // 火星赤道半径 [m]
+const double MARTIAN_YEAR = 1.88;  // 1火星年 = 1.88地球年
 
 // 火星の軌道長半径（約1.524 AU）[m]
 const double MARS_SEMI_MAJOR_AXIS = 1.52368 * AU;

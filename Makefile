@@ -22,7 +22,7 @@ OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 DEPS := $(OBJS:.o=.d)
 
 # デフォルトターゲット
-all: $(TARGET) $(GEN_TARGET)
+all: $(TARGET)
 
 # シミュレーション本体のリンク
 $(TARGET): $(OBJS) | $(BIN_DIR)
@@ -33,8 +33,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 # パラメータ生成ツールのビルド（tools/）
-$(GEN_TARGET): $(TOOLS_DIR)/parameter4096_generator.cpp | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) $< -o $@
+# $(GEN_TARGET): $(TOOLS_DIR)/parameter4096_generator.cpp | $(BIN_DIR)
+# 	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) $< -o $@
 
 # 自動生成された依存関係ファイルを読み込む
 -include $(DEPS)
