@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import concurrent.futures
 import os
 from pathlib import Path
@@ -5,11 +6,8 @@ import shutil
 import subprocess
 import sys
 
-# ==============================================================================
-# 設定パラメータ
-# ==============================================================================
-T_START = 0.0  # 描画開始時刻 [年] (None で最初から)
-T_END = 5.0  # 描画終了時刻 [年] (None で最後まで)
+# constants.hpp に基づく換算定数 (r_H / r_M)
+RH_OVER_RM = 319.1632070652
 
 
 def find_gnuplot():
@@ -19,6 +17,7 @@ def find_gnuplot():
         if path:
             return path
 
+    # 一般的な Windows のデフォルトインストール先を探索
     typical_paths = [
         r"C:\Program Files\gnuplot\bin\gnuplot.exe",
         r"C:\Program Files (x86)\gnuplot\bin\gnuplot.exe",
@@ -32,18 +31,14 @@ def find_gnuplot():
 
 
 def convert_bin_to_png_path(bin_path: Path) -> Path:
-    """out 階層を figures/trajectory に置き換えて出力先パスを決定
-
-    例: result/bulge/out/v020/00/v020_0123.bin
-     -> result/bulge/figures/trajectory/v020/00/v020_0123.png
-    """
+    """out 階層を figures/inclination に置き換える"""
     parts = list(bin_path.parts)
     if "out" in parts:
         idx = len(parts) - 1 - parts[::-1].index("out")
-        new_parts = parts[:idx] + ["figures", "trajectory"] + parts[idx + 1 :]
+        new_parts = parts[:idx] + ["figures", "inclination"] + parts[idx + 1 :]
         return Path(*new_parts).with_suffix(".png")
     else:
-        return bin_path.parent / "figures" / "trajectory" / (bin_path.stem + ".png")
+        return bin_path.parent / "figures" / "inclination" / (bin_path.stem + ".png")
 
 
 def generate_single_plot(args):
@@ -73,48 +68,34 @@ def generate_single_plot(args):
     png_str = png_path.as_posix()
     title_label = f"{bin_path.parent.name}/{bin_path.stem}"
 
-    # 時間フィルタ条件の構築 (1列目 $1 が時刻 t)
-    time_conditions = []
-    if T_START is not None:
-        time_conditions.append(f"$1 >= {T_START}")
-    if T_END is not None:
-        time_conditions.append(f"$1 <= {T_END}")
-
-    if time_conditions:
-        cond_str = " && ".join(time_conditions)
-        # 条件を満たすときは x($2), 満たさないときは 1/0 (描画スキップ)
-        using_clause = f"using (({cond_str}) ? $2 : 1/0):3"
-    else:
-        using_clause = "using 2:3"
-
-    # タイトル用の時間表記
-    time_title = ""
-    if T_START is not None and T_END is not None:
-        time_title = f" (t = {T_START:.1f} - {T_END:.1f} yr)"
-    elif T_START is not None:
-        time_title = f" (t >= {T_START:.1f} yr)"
-    elif T_END is not None:
-        time_title = f" (t <= {T_END:.1f} yr)"
-
     gp_script = f"""\
-set terminal pngcairo size 600,600 font 'Arial,10'
+set terminal pngcairo size 900,600 font 'Arial,10'
 set output "{png_str}"
-set size ratio -1
-set xrange [-1.5:1.5]
-set yrange [-1.0:1.0]
-set grid xtics ytics lc rgb "#cccccc" dt 3
-set xlabel "x [r_H]"
-set ylabel "y [r_H]"
-set title "Trajectory {title_label}{time_title}"
-set key top right
 
-# Hill sphere (r = 1.0)
-set object 1 circle at 0,0 size 1.0 fillcolor rgb "gray" fillstyle empty border lc rgb "#888888" dt 2 lw 1
-# Mars
-set object 2 circle at 0,0 size 0.025 fillcolor rgb "red" fillstyle solid border lc rgb "red"
+set xrange [0:50]
+set yrange [0:35]
 
-# Binary Trajectory
-plot "{bin_str}" binary format="%7double" {using_clause} with lines lc rgb "#9400D3" lw 1.2 title "Trajectory"
+set xlabel "Distance from Mars center r [r_M]"
+set ylabel "Orbital Inclination i [deg]"
+set title "Inclination vs Distance: {title_label}"
+set key outside right top
+
+set arrow from 1.0, 0 to 1.0, 180 nohead lc rgb "#cc0000" dt 2 lw 1
+set arrow from 0, 90 to 50, 90 nohead lc rgb "#888888" dt 2 lw 1
+
+scale_rM = {RH_OVER_RM}
+r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM
+
+hx(y, z, vy, vz) = y*vz - z*vy
+hy(x, z, vx, vz) = z*vx - x*vz
+hz(x, y, vx, vy) = x*vy - y*vx
+h_norm(x, y, z, vx, vy, vz) = sqrt(hx(y,z,vy,vz)**2 + hy(x,z,vx,vz)**2 + hz(x,y,vx,vy)**2)
+
+clamp(v) = (v > 1.0) ? 1.0 : ((v < -1.0) ? -1.0 : v)
+cos_i(x, y, z, vx, vy, vz) = (h_norm(x,y,z,vx,vy,vz) > 1e-12) ? clamp(hz(x,y,vx,vy) / h_norm(x,y,z,vx,vy,vz)) : 1/0
+inc_deg(x, y, z, vx, vy, vz) = acos(cos_i(x,y,z,vx,vy,vz)) * 180.0 / pi
+
+plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" title "Points"
 """
 
     try:
@@ -152,11 +133,7 @@ def collect_bin_files(target_path: Path):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python newplot.py <file_or_directory>")
-        print("Examples:")
-        print("  python newplot.py result/bulge")
-        print("  python newplot.py result/gas-drag/out/v020")
-        print("  python newplot.py result/bulge/out/v020/00/v020_0123.bin")
+        print("Usage: python plot_inclination.py <file_or_directory>")
         return
 
     # 1. gnuplot の存在確認
@@ -177,9 +154,7 @@ def main():
         print(f"Current working directory is: {Path.cwd()}")
         return
 
-    print(
-        f"[Info] Found {total} .bin files. Rendering (t: {T_START} -> {T_END}" " yr)..."
-    )
+    print(f"[Info] Found {total} .bin files. Preparing render tasks...")
 
     # 3. 事前に親ディレクトリの作成を試みる
     sample_png = convert_bin_to_png_path(bin_files[0])
@@ -205,10 +180,6 @@ def main():
             else:
                 err_count += 1
                 print(f"  [Failed]  {b_path.name}: {msg}")
-
-            completed = ok_count + skip_count + err_count
-            if completed % 100 == 0 or completed == total:
-                print(f"Progress: [{completed}/{total}] plots processed.")
 
     print("\n=== Result Summary ===")
     print(f"Successfully generated: {ok_count}")

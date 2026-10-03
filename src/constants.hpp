@@ -18,6 +18,7 @@ const double M_mars = 6.42e23;     // 火星質量 [kg]
 const double M_sat = 1.06e16;      // 衛星質量 [kg]
 const double AU = 1.495978707e11;  // 天文単位 [m]
 const double r_M = 3396.2e3;       // 火星赤道半径 [m]
+const double MARTIAN_YEAR = 1.88;  // 1火星年 = 1.88地球年
 
 // 火星の軌道長半径（約1.524 AU）[m]
 const double MARS_SEMI_MAJOR_AXIS = 1.52368 * AU;
@@ -38,15 +39,15 @@ const double H =
 // Hill半径
 const double r_H =
     MARS_SEMI_MAJOR_AXIS * std::pow(M_mars / (3.0 * M_sun), 1.0 / 3.0);
-// 火星のケプラー角速度 omega_K
+// 火星のケプラー角速度 omega_K [rad/sec]
 const double omega_K = std::sqrt(G * M_sun / std::pow(MARS_SEMI_MAJOR_AXIS, 3));
 // 速度のスケール係数
 const double v_scale = r_H * omega_K;
 
 // タイムスケール
 const double SEC_PER_YEAR = 365.25 * 24.0 * 3600.0;  // 1年（秒）
-// omega_K(火星のケプラー角速度)で正規化した年の単位．
-const double omega_K_yr = omega_K * SEC_PER_YEAR;
+// 単位年あたりの火星のケプラー角速度 [rad/yr]．
+const double omega_K_per_yr = omega_K * SEC_PER_YEAR;
 
 // シミュレーションの初期条件
 const double v0_m_s = 20.0;
@@ -74,13 +75,18 @@ const double DT_YEARS =
     1.0 / 65536.0;  // [年] (正規化してない方程式では年のままで使う)
 // 2^-nのタイムステップ幅を管理してみたらどうか
 const double DT =
-    DT_YEARS * omega_K_yr;  // [無次元] (正規化した方程式での積分につかう) (DT =
-                            // d\tilde{t})
+    DT_YEARS * omega_K_per_yr;  // [無次元] (正規化した方程式での積分につかう)
+                                // (DT = d\tilde{t})
 const double MAX_YEARS = 10000.0;
 
 // 無次元化した火星半径とその2乗．衝突判定に用いる
 const double r_M_norm = r_M / r_H;
 const double r_M_norm_sq = r_M_norm * r_M_norm;
+
+// 火星の赤道バルジパラメータ
+const double J2 = 0.001955;
+const double obliquity_degree = 25.0;
+const double obliquity_rad = DEG_TO_RAD(obliquity_degree);
 
 }  // namespace physics
 
