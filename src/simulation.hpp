@@ -243,6 +243,8 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
   // 記録用の変数
   int N = 0;  // 周回数．火星中心距離の極小値でインクリメント．
   bool is_temporary_capture = false;
+  bool checked_1year = false;
+  bool is_under_ej = false;
   std::string result_str = "Unknown";
 
   // 周回数カウント用の極小値を求めるための距離保存用変数
@@ -274,9 +276,15 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
       sat.v = rk4_step(sat, dt, param);
       t += physics::DT_YEARS;
 
+      // Jacobi エネルギーが0を下回ったかどうかの判定
+      if (!is_under_ej && calc_jacobi_energy(sat) <= 0.0) {
+        is_under_ej = true;
+      }
+
       // 一時捕獲を経由したかどうかの判定
-      if (t >= 1.88 && !is_temporary_capture) {
-        if (calc_jacobi_energy(sat) > 0.0) {
+      if (t >= 1.88 && !checked_1year) {
+        checked_1year = true;
+        if (!is_under_ej && calc_jacobi_energy(sat) > 0.0) {
           is_temporary_capture = true;
         }
       }
@@ -305,8 +313,7 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
         break;
       } else if (r_sq < physics::r_M_norm_sq) {  // 火星表面に到達
         terminated = true;
-        double ej = calc_jacobi_energy(sat);
-        if (ej <= 0.0) {
+        if (is_under_ej) {
           result_str =
               is_temporary_capture ? "Temporary-Capture" : "Direct-Capture";
         } else {
@@ -327,7 +334,20 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
     sat.v = rk4_step(sat, dt * 0.5, param);
     t += physics::DT_YEARS;
 
-    // 512ステップ目の周回数チェック
+    // Jacobiエネルギーの判定
+    if (!is_under_ej && calc_jacobi_energy(sat) <= 0.0) {
+      is_under_ej = true;
+    }
+
+    // 一時捕獲判定
+    if (t >= 1.88 && !checked_1year) {
+      checked_1year = true;
+      if (!is_under_ej && calc_jacobi_energy(sat) > 0.0) {
+        is_temporary_capture = true;
+      }
+    }
+
+    // 周回数チェック
     double current_r2 = sat.r.norm2();
     if (prev1_r2 < prev2_r2 && prev1_r2 < current_r2) {
       N++;
@@ -348,8 +368,7 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
       write_binary_output(ofs, t, sat);
       break;
     } else if (r_sq < physics::r_M_norm_sq) {
-      double ej = calc_jacobi_energy(sat);
-      if (ej <= 0.0) {
+      if (is_under_ej) {
         result_str =
             is_temporary_capture ? "Temporary-Capture" : "Direct-Capture";
       } else {
