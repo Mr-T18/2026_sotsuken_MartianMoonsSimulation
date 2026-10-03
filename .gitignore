@@ -5,3 +5,7 @@ figures/*
 result/*
 !result/.gitkeep
 scripts/plot_modules/__pycache__
+bin/*
+!bin/.gitkeep
+build/*
+!build/.gitkeep
