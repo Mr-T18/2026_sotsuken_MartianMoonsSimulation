@@ -125,7 +125,8 @@ inline State leapfrog_step(const State& current, const double& dt,
   Vec3 g_current = get_gravity_acceleration(current.r, param);
 
   // 赤道バルジによる力を計算
-  Vec3 a_bulge_current = get_bulge_acceleration(current.r, t_norm, param);
+  // Vec3 a_bulge_current = get_bulge_acceleration(current.r, t_norm, param);
+  Vec3 a_bulge_current = {0.0, 0.0, 0.0};
 
   // First Kick:
   // コリオリ力を含めて速度をdt/2更新．コリオリ力は既知なので，陰的に解くことができる
@@ -143,7 +144,8 @@ inline State leapfrog_step(const State& current, const double& dt,
   // コリオリ力は速度依存で既知ではないので，行列の式変形をして，なんとか陰的に解く
   // 新しい位置での重力加速度の計算
   Vec3 g_next = get_gravity_acceleration(next.r, param);
-  Vec3 a_bulge_next = get_bulge_acceleration(next.r, t_norm + dt, param);
+  // Vec3 a_bulge_next = get_bulge_acceleration(next.r, t_norm + dt, param);
+  Vec3 a_bulge_next = {0.0, 0.0, 0.0};
   Vec3 g_total_next = g_next + a_bulge_next;
   double Ax = v_half.x + dt_half * g_total_next.x;
   double Ay = v_half.y + dt_half * g_total_next.y;

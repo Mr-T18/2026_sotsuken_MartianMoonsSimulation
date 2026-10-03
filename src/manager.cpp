@@ -21,7 +21,7 @@
 #define NUM_V0 8
 #define NUM_CORES 8
 #define ANGLES_CSV_PATH "data/angles_4096.csv"
-#define OUTPUT_DIR "result/parameter"
+#define OUTPUT_DIR "result/gas-drag"
 
 // 初期条件アングルcsv を読み込んで std::vector配列 に格納する関数
 std::vector<InitialAngle> load_initial_angles(const std::string& filepath) {
@@ -82,10 +82,12 @@ int main() {
   // 出力用ディレクトリ作成
   std::ostringstream output_dirname;
   std::ostringstream output_filename;
-  output_dirname << OUTPUT_DIR << "/Obl-" << std::setw(3) << std::setfill('0')
-                 << static_cast<int>(RAD_TO_DEG(param.obl)) << "_J2-"
-                 << "midium"
-                 << "_Gas-" << "Large" << "/out";
+  // output_dirname << OUTPUT_DIR << "/Obl-" << std::setw(3) <<
+  // std::setfill('0')
+  //                << static_cast<int>(RAD_TO_DEG(param.obl)) << "_J2-"
+  //                << "midium"
+  //                << "_Gas-" << "Large" << "/out";
+  output_dirname << OUTPUT_DIR << "/out";
   std::filesystem::create_directories(output_dirname.str());
 
   // 8通りのv0ごとに全アングルを組み合わせたアンサンブルを構成; 計32768通り
