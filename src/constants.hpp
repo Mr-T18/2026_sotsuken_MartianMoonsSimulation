@@ -27,9 +27,9 @@ const double MARS_SEMI_MAJOR_AXIS = 1.52368 * AU;
 const double a_b = 10.0 * 1000.0;  // 半径[m]
 const double rho_b = 1850.0;       // 密度[kg m^-3]
 
-// ガス密度
-const double rho_neb = 4.7e-7;  // 密度[kg m^-3]
-const double c_s = 840.4;       // 等温音速[m s^-1]
+// // ガス密度
+// const double rho_neb = 4.7e-7;  // 密度[kg m^-3]
+const double c_s = 840.4;  // 等温音速[m s^-1]
 const double H =
     G * M_mars /
     (c_s *
@@ -83,10 +83,11 @@ const double MAX_YEARS = 10000.0;
 const double r_M_norm = r_M / r_H;
 const double r_M_norm_sq = r_M_norm * r_M_norm;
 
-// 火星の赤道バルジパラメータ
-const double J2 = 0.001955;
-const double obliquity_degree = 25.0;
-const double obliquity_rad = DEG_TO_RAD(obliquity_degree);
+// // 火星の赤道バルジパラメータ
+// const double J2 = 0.001955;
+// // const double J2 = 0.0;
+// const double obliquity_degree = 20.0;
+// const double obliquity_rad = DEG_TO_RAD(obliquity_degree);
 
 }  // namespace physics
 

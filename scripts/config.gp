@@ -33,7 +33,7 @@ RAD_TO_DEG(rad) = rad * 180.0 / pi
 
 dot(v11, v12, v13, v21, v22, v23) = v11 * v21 + v12 * v22 + v13 * v23
 
-set terminal pngcairo size 800,800 enhanced font 'MS Gothic,11'
+set terminal pngcairo size 800,800 enhanced font 'MS Gothic,18'
 
 set grid
 set angle degrees

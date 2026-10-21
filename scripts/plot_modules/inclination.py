@@ -13,6 +13,7 @@ def get_gnuplot_script(bin_path: Path, png_path: Path) -> str:
 
     return f"""\
 load "{config_path}"
+set terminal pngcairo size 900,600 font 'Arial,10'
 set output "{png_str}"
 set xrange [0:50]
 set yrange [0:35]
@@ -39,5 +40,5 @@ clamp(v) = (v > 1.0) ? 1.0 : ((v < -1.0) ? -1.0 : v)
 cos_i(x, y, z, vx, vy, vz) = (h_norm(x,y,z,vx,vy,vz) > 1e-12) ? clamp(hz(x,y,vx,vy) / h_norm(x,y,z,vx,vy,vz)) : 1/0
 inc_deg(x, y, z, vx, vy, vz) = acos(cos_i(x,y,z,vx,vy,vz)) * 180.0 / pi
 
-plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" title "Points"
+plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" notitle
 """

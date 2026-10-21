@@ -10,13 +10,16 @@ def get_gnuplot_script(bin_path: Path, png_path: Path) -> str:
 
     return f"""\
 load "{config_path}"
+set terminal pngcairo size 800,600 enhanced font 'MS Gothic,18'
 set output "{png_str}"
-set title "{title_label} trajectory" noenhanced
+set title " " noenhanced
 set xlabel "x [r_H]"
 set ylabel "y [r_H]"
 set xrange [-1.5:1.5]
 set yrange [-1.0:1.0]
 set size ratio -1
 
-plot "{bin_str}" binary format="%7double" u ($2):($1 < 2.0 ? $3 : 1/0) w l lc rgb "#9400D3" lw 1.2 notitle
+set label 1 at 0,0 "" point pt 7 ps 1.5 lc rgb "red" front
+
+plot "{bin_str}" binary format="%7double" u ($2):($1 < 5.0 ? $3 : 1/0) w l lc rgb "#9400D3" lw 1.2 notitle
 """

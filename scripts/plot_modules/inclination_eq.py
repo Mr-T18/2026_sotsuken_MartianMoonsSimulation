@@ -13,7 +13,7 @@ def get_gnuplot_script(bin_path: Path, png_path: Path) -> str:
 
     return f"""\
 load "{config_path}"
-set terminal pngcairo size 900,600 font 'Arial,10'
+set terminal pngcairo size 900,600
 set output "{png_str}"
 
 set xrange [0:50]
@@ -22,12 +22,10 @@ set yrange [0:35]
 # config.gp の設定に左右されないよう、明示的にラジアン基準へ統一
 set angles radians
 
-set xlabel "Distance from Mars center r [r_M]"
-set ylabel "Orbital Inclination i [deg]"
-set title "{title_label}" noenhanced
-set key outside right top
+set xlabel "火星からの距離 r [r_M]"
+set ylabel "火星赤道面に対する軌道傾斜角 i [deg]"
 
-set arrow from 1.0, 0 to 1.0, 180 nohead lc rgb "#cc0000" dt 2 lw 1
+set arrow from 1.0, 0 to 1.0, 35 nohead lc rgb "#cc0000" dt 2 lw 1
 set arrow from 0, 90 to 50, 90 nohead lc rgb "#888888" dt 2 lw 1
 
 scale_rM = {RH_OVER_RM}
@@ -50,5 +48,5 @@ cos_i(t, x, y, z, vx, vy, vz) = (h_norm(x,y,z,vx,vy,vz) > 1e-12) ? \
     clamp(dot(hx(y,z,vy,vz), hy(x,z,vx,vz), hz(x,y,vx,vy), sx(t), sy(t), sz) / h_norm(x,y,z,vx,vy,vz)) : 1/0
 inc_deg(t, x, y, z, vx, vy, vz) = acos(cos_i(t, x, y, z, vx, vy, vz)) * 180.0 / pi
 
-plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" title "Points"
+plot "{bin_str}" binary format="%7double" using (r_norm_rM($2,$3,$4)):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#0066CC" notitle
 """

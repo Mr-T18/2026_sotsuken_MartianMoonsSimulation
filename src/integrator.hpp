@@ -69,7 +69,7 @@ inline Vec3 get_bulge_acceleration(
     const double& t_norm,   // 正規化された時間
     const Parameter& param  // 火星の自転軸傾斜角[rad]
 ) {
-  double K = 4.5 * physics::J2 * (physics::r_M / physics::r_H) *
+  double K = 4.5 * param.J2 * (physics::r_M / physics::r_H) *
              (physics::r_M / physics::r_H);  // 赤道バルジの項にかかる係数
   double obl = param.obl;
   Vec3 spin_axis = {std::sin(obl) * std::cos(-t_norm),
@@ -144,6 +144,7 @@ inline State leapfrog_step(const State& current, const double& dt,
   // 新しい位置での重力加速度の計算
   Vec3 g_next = get_gravity_acceleration(next.r, param);
   Vec3 a_bulge_next = get_bulge_acceleration(next.r, t_norm + dt, param);
+  // Vec3 a_bulge_next = {0.0, 0.0, 0.0};
   Vec3 g_total_next = g_next + a_bulge_next;
   double Ax = v_half.x + dt_half * g_total_next.x;
   double Ay = v_half.y + dt_half * g_total_next.y;

@@ -66,7 +66,9 @@ int main() {
   const double v0_list[8] = {20.0,  40.0,  60.0,  80.0,
                              100.0, 120.0, 140.0, 160.0};
 
-  Parameter param = {physics::obliquity_rad, physics::J2, physics::rho_neb};
+  // Parameter param = {physics::obliquity_degree, physics::obliquity_rad,
+  //                    physics::J2, physics::rho_neb};
+  Parameter param;
 
   // 回すべきシミュレーションを精査する
   std::vector<InitialAngle> angles;
@@ -83,9 +85,8 @@ int main() {
   std::ostringstream output_dirname;
   std::ostringstream output_filename;
   output_dirname << OUTPUT_DIR << "/Obl-" << std::setw(3) << std::setfill('0')
-                 << static_cast<int>(RAD_TO_DEG(param.obl)) << "_J2-"
-                 << "midium"
-                 << "_Gas-" << "Large" << "/out";
+                 << static_cast<int>(param.obl_degree) << "_J2-" << J2_MAGNITUDE
+                 << "_Gas-" << GAS_MAGNITUDE << "/out";
   std::filesystem::create_directories(output_dirname.str());
 
   // 8通りのv0ごとに全アングルを組み合わせたアンサンブルを構成; 計32768通り
