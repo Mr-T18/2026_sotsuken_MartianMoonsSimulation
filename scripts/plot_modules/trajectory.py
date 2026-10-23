@@ -15,11 +15,11 @@ set output "{png_str}"
 set title " " noenhanced
 set xlabel "x [r_H]"
 set ylabel "y [r_H]"
-set xrange [-1.5:1.5]
-set yrange [-1.0:1.0]
+set xrange [rM_to_rH(-100):rM_to_rH(100)]
+set yrange [rM_to_rH(-100):rM_to_rH(100)]
 set size ratio -1
 
 set label 1 at 0,0 "" point pt 7 ps 1.5 lc rgb "red" front
 
-plot "{bin_str}" binary format="%7double" u ($2):($1 < 5.0 ? $3 : 1/0) w l lc rgb "#9400D3" lw 1.2 notitle
+plot "{bin_str}" binary format="%7double" u ($2):($1 < 1.0 ? $3 : 1/0) w l lc rgb "#9400D3" lw 1.2 notitle
 """

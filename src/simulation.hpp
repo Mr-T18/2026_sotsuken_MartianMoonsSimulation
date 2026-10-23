@@ -1,6 +1,8 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
+#include "parameter.hpp"
+
 // 角度パラメータを保持する構造体
 struct InitialAngle {
   int id;
@@ -43,13 +45,18 @@ void output_state(std::ofstream& ofs, double t, const State& sat) {
 
 State init_state(const InitialAngle& angle, const double v0) {
   State sat;
-  sat.r.x = 1.0;
+  // sat.r.x = 1.0;
+  // 理想実験なので，50火星半径から
+  sat.r.x = 50.0 * physics::r_M / physics::r_H;
   sat.r.y = 0.0;
   sat.r.z = 0.0;
   double v_norm = v0 / physics::v_scale;
-  sat.v.x = -v_norm * std::cos(angle.zeta) * std::sin(angle.phi);
-  sat.v.y = -v_norm * std::cos(angle.zeta) * std::cos(angle.phi);
-  sat.v.z = v_norm * std::sin(angle.zeta);
+  // sat.v.x = -v_norm * std::cos(angle.zeta) * std::sin(angle.phi);
+  // sat.v.y = -v_norm * std::cos(angle.zeta) * std::cos(angle.phi);
+  // sat.v.z = v_norm * std::sin(angle.zeta);
+  sat.v.x = 0.0;
+  sat.v.y = -v_norm * std::cos(angle.zeta) * std::cos(angle.phi) - sat.r.x;
+  sat.v.z = 0.0;
   return sat;
 }
 
@@ -212,28 +219,27 @@ void simulate(const std::vector<InitialCase>& initial_cases,
 // 1ケース分のシミュレーションを実行する関数
 inline void simulate_single(const InitialCase& ic, const Parameter& param,
                             const std::string& output_dirname,
-                            std::ofstream& v0_summary_csv,
-                            std::mutex& v0_mutex) {
-  const double OUTPUT_INTERVAL = 1.0 / 128.0;  // 出力間隔[年]
+                            std::ofstream& v0_summary_csv) {
+  const double OUTPUT_INTERVAL = 1.0 / 512.0;  // 出力間隔[年]
   const double dt = physics::DT;               // 計算に用いるタイムステップ幅
 
   int v0_int = static_cast<int>(ic.v0);
   int angle_id = ic.angle.id;
 
   // 出力ディレクトリパスの作成と存在確認（無ければ自動生成）
-  int sub_dir = angle_id / 1024;
+  // int sub_dir = angle_id / 1024;
   std::ostringstream dir_path;
-  dir_path << output_dirname << "/v" << std::setw(3) << std::setfill('0')
-           << v0_int << "/" << std::setw(2) << std::setfill('0') << sub_dir;
+  dir_path << output_dirname;
   if (!std::filesystem::exists(dir_path.str())) {
     std::filesystem::create_directories(dir_path.str());
   }
 
-  // 出力ファイルパスの作成
+  // 出力ファイルパスの作成（理想実験の場合）
   std::ostringstream out_file_path;
-  out_file_path << dir_path.str() << "/v" << std::setw(3) << std::setfill('0')
-                << v0_int << "_" << std::setw(4) << std::setfill('0')
-                << angle_id << ".bin";
+  out_file_path << dir_path.str() << "/Obl-" << std::setw(3)
+                << std::setfill('0') << static_cast<int>(param.obl_degree)
+                << "_J2-" << J2_MAGNITUDE << "_Gas-" << GAS_MAGNITUDE
+                << "_ideal" << ".bin";
   std::ofstream ofs(out_file_path.str(), std::ios::binary);
   if (!ofs.is_open()) {
     std::cerr << "Error: Cannot open " << out_file_path.str() << std::endl;
@@ -388,13 +394,9 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
     result_str = is_temporary_capture ? "Temporary-Survive" : "Direct-Survive";
   }
 
-  // サマリーCSVへの追記: 他スレッドとの衝突を防ぐためMutexを使って排他制御
-  {
-    std::lock_guard<std::mutex> lock(v0_mutex);
-    record_csv(v0_summary_csv, angle_id, ic.angle, ic.v0, N, t, result_str);
-    // 明示的にディスクへ書き出す
-    v0_summary_csv.flush();
-  }
+  record_csv(v0_summary_csv, angle_id, ic.angle, ic.v0, N, t, result_str);
+  // 明示的にディスクへ書き出す
+  v0_summary_csv.flush();
 }
 
 #endif

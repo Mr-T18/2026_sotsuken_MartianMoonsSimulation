@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 
 #define J2_MAGNITUDE "Midium"
-#define GAS_MAGNITUDE "Small"
+#define GAS_MAGNITUDE "Large"
 
 struct Parameter {
   double obl_degree = 25.0;

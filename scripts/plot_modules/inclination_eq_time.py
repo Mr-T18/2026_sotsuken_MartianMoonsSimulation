@@ -31,11 +31,6 @@ set arrow from 0, 90 to 50, 90 nohead lc rgb "#888888" dt 2 lw 1
 scale_rM = {RH_OVER_RM}
 r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM
 
-hx(y, z, vy, vz) = y*vz - z*vy
-hy(x, z, vx, vz) = z*vx - x*vz
-hz(x, y, vx, vy) = x*vy - y*vx
-h_norm(x, y, z, vx, vy, vz) = sqrt(hx(y,z,vy,vz)**2 + hy(x,z,vx,vz)**2 + hz(x,y,vx,vy)**2)
-
 phi = 25.0 * pi / 180.0
 theta(t) = - omegaK * (t * SEC_PER_YEAR) # Hill座標系における火星の自転軸傾斜角
 

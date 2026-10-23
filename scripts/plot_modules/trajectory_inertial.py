@@ -14,8 +14,8 @@ set output "{png_str}"
 set title "{title_label} trajectory(inertial)" noenhanced
 set xlabel "x [r_H]"
 set ylabel "y [r_H]"
-set xrange [-1.5:1.5]
-set yrange [-1.0:1.0]
+set xrange [rM_to_rH(-100):rM_to_rH(100)]
+set yrange [rM_to_rH(-100):rM_to_rH(100)]
 set size ratio -1
 
 set angles radians
@@ -29,7 +29,7 @@ rotateY(x, y, theta) = x * sin(theta) + y * cos(theta)
 Martian_theta(t_yr) = omegaK * t_yr * SEC_PER_YEAR
 
 plot "{bin_str}" binary format="%7double" \
-    u ($1 <= 2.0 ? rotateX($2, $3, Martian_theta($1)) : 1/0):\
-      ($1 <= 2.0 ? rotateY($2, $3, Martian_theta($1)) : 1/0) \
+    u ($1 <= 1 ? rotateX($2, $3, Martian_theta($1)) : 1/0):\
+      ($1 <= 1 ? rotateY($2, $3, Martian_theta($1)) : 1/0) \
     w l lc rgb "#9400D3" lw 1.2 notitle
 """

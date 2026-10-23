@@ -16,6 +16,7 @@ omegaK = sqrt(G * MS / (MARS_SEMI_MAJOR_AXIS ** 3))
 # 関数だ
 # Hill半径から火星半径の単位変換
 rH_to_rM(x) = (x * rH) / rM
+rM_to_rH(x) = (x * rM) / rH
 
 # 速度を求めるぞ
 v(vx, vy, vz) = sqrt(vx**2 + vy**2 + vz**2)
@@ -32,6 +33,11 @@ DEG_TO_RAD(deg) = deg / 180.0 * pi
 RAD_TO_DEG(rad) = rad * 180.0 / pi
 
 dot(v11, v12, v13, v21, v22, v23) = v11 * v21 + v12 * v22 + v13 * v23
+
+hx(y, z, vy, vz) = y*vz - z*vy
+hy(x, z, vx, vz) = z*vx - x*vz
+hz(x, y, vx, vy) = x*vy - y*vx
+h_norm(x, y, z, vx, vy, vz) = sqrt(hx(y,z,vy,vz)**2 + hy(x,z,vx,vz)**2 + hz(x,y,vx,vy)**2)
 
 set terminal pngcairo size 800,800 enhanced font 'MS Gothic,18'
 
