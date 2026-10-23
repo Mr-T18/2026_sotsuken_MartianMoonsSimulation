@@ -22,7 +22,7 @@ set yrange [0:35]
 # config.gp の設定に左右されないよう、明示的にラジアン基準へ統一
 set angles radians
 
-set xlabel "火星からの距離 r [r_M]"
+set xlabel "火星からの距離 r [火星半径]"
 set ylabel "火星赤道面に対する軌道傾斜角 i [deg]"
 
 set arrow from 1.0, 0 to 1.0, 35 nohead lc rgb "#cc0000" dt 2 lw 1
