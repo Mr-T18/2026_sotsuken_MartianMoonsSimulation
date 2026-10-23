@@ -13,16 +13,16 @@ def get_gnuplot_script(bin_path: Path, png_path: Path) -> str:
 
     return f"""\
 load "{config_path}"
-set terminal pngcairo size 900,600 font 'Arial,10'
+set terminal pngcairo size 900,600
 set output "{png_str}"
-set xrange [0:50]
-set yrange [0:35]
+set xrange [*:*]
+set yrange [*:*]
 
 # config.gp の設定に左右されないよう、明示的にラジアン基準へ統一
 set angles radians
 
-set xlabel "Distance from Mars center r [r_M]"
-set ylabel "Orbital Inclination i [deg]"
+set xlabel "火星からの距離 r [火星半径]"
+set ylabel "火星公転面に対する軌道傾斜角 i [deg]"
 set title "{title_label}" noenhanced
 
 set arrow from 1.0, 0 to 1.0, 180 nohead lc rgb "#cc0000" dt 2 lw 1

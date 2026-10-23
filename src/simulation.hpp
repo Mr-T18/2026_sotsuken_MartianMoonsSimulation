@@ -55,6 +55,7 @@ State init_state(const InitialAngle& angle, const double v0) {
   // sat.v.y = -v_norm * std::cos(angle.zeta) * std::cos(angle.phi);
   // sat.v.z = v_norm * std::sin(angle.zeta);
   sat.v.x = 0.0;
+  // 完全な円軌道を再現するための式．符号に気をつけて
   sat.v.y = -v_norm * std::cos(angle.zeta) * std::cos(angle.phi) - sat.r.x;
   sat.v.z = 0.0;
   return sat;

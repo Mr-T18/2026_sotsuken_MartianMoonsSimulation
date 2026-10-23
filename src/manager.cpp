@@ -27,7 +27,7 @@ int main() {
   Parameter param;
 
   // 回すべきシミュレーションを精査する
-  InitialAngle ideal_angle = {0, DEG_TO_RAD(0.0), DEG_TO_RAD(0.0)};
+  InitialAngle ideal_angle = {0, DEG_TO_RAD(180.0), DEG_TO_RAD(0.0)};
 
   // 出力用ディレクトリ作成
   std::ostringstream output_dirname;

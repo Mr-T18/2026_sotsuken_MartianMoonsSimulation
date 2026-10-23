@@ -21,5 +21,5 @@ set size ratio -1
 
 set label 1 at 0,0 "" point pt 7 ps 1.5 lc rgb "red" front
 
-plot "{bin_str}" binary format="%7double" u ($2):($1 < 1.0 ? $3 : 1/0) w l lc rgb "#9400D3" lw 1.2 notitle
+plot "{bin_str}" binary format="%7double" u ($2):($1 < 0.05 ? $3 : 1/0) w l lc rgb "#9400D3" lw 1.2 notitle
 """

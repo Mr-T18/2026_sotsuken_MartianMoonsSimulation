@@ -16,8 +16,8 @@ load "{config_path}"
 set terminal pngcairo size 900,600
 set output "{png_str}"
 
-set xrange [0:50]
-set yrange [0:35]
+set xrange [*:*]
+set yrange [*:*]
 
 # config.gp の設定に左右されないよう、明示的にラジアン基準へ統一
 set angles radians

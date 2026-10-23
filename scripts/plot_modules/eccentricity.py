@@ -16,7 +16,7 @@ set title " " noenhanced
 set xlabel "時間 [yr]"
 set ylabel "離心率"
 set xrange [0:*]
-set yrange [0:1.0]
+set yrange [-0.2:0.2]
 
 # 軌道離心率を求める
 mu = 3.0
