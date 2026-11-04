@@ -84,7 +84,7 @@ int main() {
   std::ostringstream output_filename;
   output_dirname << OUTPUT_DIR << "/Obl-" << std::setw(3) << std::setfill('0')
                  << static_cast<int>(RAD_TO_DEG(param.obl)) << "_J2-"
-                 << "midium"
+                 << "Midium"
                  << "_Gas-" << "Large" << "/out";
   std::filesystem::create_directories(output_dirname.str());
 
