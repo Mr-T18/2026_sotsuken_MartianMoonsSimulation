@@ -17,11 +17,12 @@ set terminal pngcairo size 900,600
 set output "{png_str}"
 
 set xrange [*:*]
-set yrange [*:*]
+set yrange [0:30]
 
 # config.gp の設定に左右されないよう、明示的にラジアン基準へ統一
 set angles radians
 
+set title "{title_label}" noenhanced
 set xlabel "火星からの距離 r [火星半径]"
 set ylabel "火星赤道面に対する軌道傾斜角 i [deg]"
 
@@ -36,8 +37,10 @@ hy(x, z, vx, vz) = z*vx - x*vz
 hz(x, y, vx, vy) = x*vy - y*vx
 h_norm(x, y, z, vx, vy, vz) = sqrt(hx(y,z,vy,vz)**2 + hy(x,z,vx,vz)**2 + hz(x,y,vx,vy)**2)
 
-phi = 25.0 * pi / 180.0
-theta(t) = - omegaK * (t * SEC_PER_YEAR) # Hill座標系における火星の自転軸傾斜角
+obl = 25.0
+
+phi = obl * pi / 180.0
+theta(t) = - omegaK * (t * SEC_PER_YEAR) # Hill座標系における火星の自転軸のxy平面での極座標方向
 
 sx(t) = sin(phi) * cos(theta(t))
 sy(t) = sin(phi) * sin(theta(t))

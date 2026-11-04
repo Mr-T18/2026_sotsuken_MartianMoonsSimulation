@@ -29,7 +29,7 @@ rotateY(x, y, theta) = x * sin(theta) + y * cos(theta)
 Martian_theta(t_yr) = omegaK * t_yr * SEC_PER_YEAR
 
 plot "{bin_str}" binary format="%7double" \
-    u ($1 <= 1 ? rotateX($2, $3, Martian_theta($1)) : 1/0):\
-      ($1 <= 1 ? rotateY($2, $3, Martian_theta($1)) : 1/0) \
+    u ($1 <= 5 ? rotateX($2, $3, Martian_theta($1)) : 1/0):\
+      ($1 <= 5 ? rotateY($2, $3, Martian_theta($1)) : 1/0) \
     w l lc rgb "#9400D3" lw 1.2 notitle
 """
