@@ -87,6 +87,7 @@ int main() {
   output_dirname << OUTPUT_DIR << "/Obl-" << std::setw(3) << std::setfill('0')
                  << static_cast<int>(param.obl_degree) << "_J2-" << J2_MAGNITUDE
                  << "_Gas-" << GAS_MAGNITUDE << "/out";
+
   std::filesystem::create_directories(output_dirname.str());
 
   // 8通りのv0ごとに全アングルを組み合わせたアンサンブルを構成; 計32768通り
