@@ -60,6 +60,11 @@ wrap360(x) = x - 360.0 * floor(x / 360.0)
 # 完全同期（位相差0度）の基準線
 set arrow from graph 0, first 0 to graph 1, first 0 nohead lc rgb "#888888" dt 2 lw 1
 
+
+# print d_phi(0, 0.156659662, 0.0, 0.0, 0.0, 4.21938792, 0.0)
+
+
 plot "{bin_str}" binary format="%7double" u 1:(d_phi($1,$2,$3,$4,$5,$6,$7)) \
      w l lc rgb "#0066CC" lw 1.5 title "Phase Lag (Orbital Normal - Spin Axis)"
+
 """

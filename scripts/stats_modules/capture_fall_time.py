@@ -100,6 +100,7 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
 
     # 出力先ディレクトリ
     stats_dir = Path("stats")
+
     figures_dir = Path("stats/capture_fall_time")
     stats_dir.mkdir(parents=True, exist_ok=True)
     figures_dir.mkdir(parents=True, exist_ok=True)
@@ -155,7 +156,7 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
 {load_config}set terminal pngcairo size 900, 550 font "Arial,11"
 set output "{png_str}"
 set datafile separator ","
-set title "Decay Time: v0 = {v} km/s ({tag})" noenhanced
+set title "Decay Time: v0 = {v} m/s ({tag})" noenhanced
 set xlabel "Decay Timescale [yr]"
 set ylabel "Probability"
 set yrange [0:*]
