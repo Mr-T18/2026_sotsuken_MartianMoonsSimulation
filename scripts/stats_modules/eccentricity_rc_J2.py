@@ -162,9 +162,11 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
     tag = f"Obl-{obl:03d}_Gas-{gas}_v0-{v0}"
 
     stats_dir = Path("stats")
-    figures_dir = Path("stats/eccentricity_rc_J2")
+    figures_dir = Path("stats/eccentricity_rc_J2/figure")
+    data_dir = Path("stats/eccentricity_rc_J2/data")
     stats_dir.mkdir(parents=True, exist_ok=True)
     figures_dir.mkdir(parents=True, exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     # 離心率用ビン（0.0 から 1.0 まで）
     bins = np.arange(0.0, 1.0 + BIN_WIDTH_ECC, BIN_WIDTH_ECC)

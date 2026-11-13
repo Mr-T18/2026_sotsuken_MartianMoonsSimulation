@@ -4,7 +4,7 @@ import pandas as pd
 
 # 定数設定
 TIME_UNIT_FACTOR = 1.0
-BIN_WIDTH_DEG = 5.0
+BIN_WIDTH_DEG = 2.0
 VELOCITIES = [20, 40, 60, 80, 100, 120, 140, 160]
 RECORD_DTYPE = np.dtype(
     [
@@ -180,12 +180,13 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
     # 出力先ディレクトリ
     stats_dir = Path("stats")
 
-    figures_dir = Path("stats/inclination_eq_rc")
+    figures_dir = Path("stats/inclination_eq_rc/figure")
+    data_dir = Path("stats/inclination_eq_rc/data")
     stats_dir.mkdir(parents=True, exist_ok=True)
     figures_dir.mkdir(parents=True, exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     # ビン設定
-
     bins = np.arange(0.0, 180.0 + BIN_WIDTH_DEG, BIN_WIDTH_DEG)
     # 集約用データフレームの作成
     bin_starts = bins[:-1].astype(int)
@@ -210,8 +211,8 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
         total_v = len(times)
         df_prob[f"v{v:03d}_prob"] = counts / total_v if total_v > 0 else 0.0
 
-    raw_csv = stats_dir / f"inclination_eq_rc_raw_{tag}.csv"
-    prob_csv = stats_dir / f"inclination_eq_rc_prob_{tag}.csv"
+    raw_csv = data_dir / f"inclination_eq_rc_raw_{tag}.csv"
+    prob_csv = data_dir / f"inclination_eq_rc_prob_{tag}.csv"
     df_count.to_csv(raw_csv, index=False)
     df_prob.to_csv(prob_csv, index=False)
     print(f"[Saved CSV] {raw_csv}")

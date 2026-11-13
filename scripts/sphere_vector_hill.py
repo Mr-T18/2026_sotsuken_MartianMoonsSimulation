@@ -8,12 +8,17 @@ from mpl_toolkits.mplot3d.art3d import Line3D
 import numpy as np
 
 # 定数だ
-MS = 1.99e30  # 太陽質量[kg]
-MM = 6.42e23  # 火星質量[kg]
+M_SUN = 1.99e30  # 太陽質量[kg]
+M_MARS = 6.42e23  # 火星質量[kg]
 AU = 1.495978707e11  # 天文単位[m]
 rM = 3396.2e3  # 火星赤道半径 [m]
-MARS_SEMI_MAJOR_AXIS = 1.52368 * AU  # 火星の軌道長半径[m]
-rH = MARS_SEMI_MAJOR_AXIS * (MM / (3 * MS)) ** (1.0 / 3.0)  # Hill半径[m]
+MARS_SEMI_MAJOR_AXIS = 1.52368 * AU
+rH = MARS_SEMI_MAJOR_AXIS * (M_MARS / (3 * M_SUN)) ** (1.0 / 3.0)  # Hill半径[m]
+G = 6.67430e-11
+
+SEC_PER_YEAR = 365.25 * 86400
+OMEGA_K = np.sqrt(G * M_SUN / np.power(MARS_SEMI_MAJOR_AXIS, 3))
+PHI = 25.0 * np.pi / 180.0
 
 
 # Hill半径から火星半径の単位変換
