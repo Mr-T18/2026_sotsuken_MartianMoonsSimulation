@@ -5,7 +5,7 @@ import pandas as pd
 # 定数設定
 TIME_UNIT_FACTOR = 1.0
 BIN_WIDTH_DEG = 2.0
-J2 = ["No", "Small", "Midium", "Large"]
+J2_ORDER = ["No", "Small", "Midium", "Large"]
 RECORD_DTYPE = np.dtype(
     [
         ("t", "<f8"),
@@ -28,6 +28,7 @@ PHI = 25.0 * np.pi / 180.0
 
 RH_OVER_RM = 319.1632070652  # Hill半径 [火星半径]
 R_COROT_RM = 6.015  # 共回転半径 [火星半径]
+R_FILTER_RH_SQ = (15.0 / RH_OVER_RM) ** 2  # 足切り距離（15 r_M）の2乗 [Hill半径^2]
 
 
 def compute_semi_major_axis_rM(x, y, z, vx, vy, vz):
@@ -108,7 +109,6 @@ def run_analysis(ctx: dict) -> dict:
     ]["ID"].tolist()
 
     inc_list = []
-    r_corot_rH = R_COROT_RM / RH_OVER_RM  # 共回転半径 [Hill半径]
     j2_val = ctx.get("j2", "Unknown")
 
     for fid in captured_ids:
@@ -123,12 +123,16 @@ def run_analysis(ctx: dict) -> dict:
             n_records = bin_path.stat().st_size // 56
             m = np.memmap(bin_path, dtype=RECORD_DTYPE, mode="r", shape=(n_records,))
 
-            # 4096ステップ単位で Jacobi エネルギーを評価
             hit_step = None
             CHUNK_SIZE = 65536
 
             for start in range(0, n_records, CHUNK_SIZE):
                 chunk = m[start : min(start + CHUNK_SIZE, n_records)]
+
+                # 距離の最小値が 15 r_M より遠ければ軌道長半径の計算ごとスキップ
+                r_sq = chunk["x"] ** 2 + chunk["y"] ** 2 + chunk["z"] ** 2
+                if np.min(r_sq) > R_FILTER_RH_SQ:
+                    continue
 
                 r_a = compute_semi_major_axis_rM(
                     chunk["x"],
@@ -138,9 +142,6 @@ def run_analysis(ctx: dict) -> dict:
                     chunk["vy"],
                     chunk["vz"],
                 )
-
-                if (chunk["x"] ** 2 + chunk["y"] ** 2 + chunk["z"] ** 2) > 15 * 2:
-                    continue
 
                 idx_cross = np.where((~np.isnan(r_a)) & (r_a <= R_COROT_RM))[0]
                 if len(idx_cross) > 0:
@@ -160,14 +161,14 @@ def run_analysis(ctx: dict) -> dict:
             vz = float(hit_step["vz"])
 
             i_eq = compute_inclination(t, x, y, z, vx, vy, vz)
-
-            inc_list.append(i_eq)
+            if i_eq is not None:
+                inc_list.append(i_eq)
 
         except Exception:
             continue
 
     print(
-        f"[v{ctx['v0']:03d}] Valid: {len(inc_list)} / {len(captured_ids)}",
+        f"[J2 {j2_val}] Valid: {len(inc_list)} / {len(captured_ids)}",
         flush=True,
     )
     return {"j2": j2_val, "inclinations": inc_list}
@@ -185,25 +186,25 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
         print("[Warning] 有効な捕獲データがありませんでした。")
         return
 
+    # 実際に取得されたJ2キーを定義順に並べ替え
+    j2_keys = [k for k in J2_ORDER if k in inc_dict] + [
+        k for k in inc_dict if k not in J2_ORDER
+    ]
+
     # コマンド引数から識別子を作成
     obl = filter_info.get("obl")
-    j2 = filter_info.get("j2")
     gas = filter_info.get("gas")
     v0 = filter_info.get("v0")
-    tag = f"Obl-{obl:03d}_Gas-{gas}_v0-{v0}"
+    tag = f"Obl-{obl:03d}_Gas-{gas}_v0-{v0:03d}"
 
     # 出力先ディレクトリ
-    stats_dir = Path("stats")
-
     figures_dir = Path("stats/inclination_eq_rc_J2/figure")
     data_dir = Path("stats/inclination_eq_rc_J2/data")
-    stats_dir.mkdir(parents=True, exist_ok=True)
     figures_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
 
     # ビン設定
     bins = np.arange(0.0, 180.0 + BIN_WIDTH_DEG, BIN_WIDTH_DEG)
-    # 集約用データフレームの作成
     bin_starts = bins[:-1].astype(int)
     bin_ends = bins[1:].astype(int)
     bin_labels = [f"{s}-{e}" for s, e in zip(bin_starts, bin_ends)]
@@ -217,8 +218,8 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
     )
     df_prob = df_count.copy()
 
-    # 各初速度（v020〜v160）の度数および割合を計算
-    for j2_name in J2:
+    # 各J2の度数および割合を計算
+    for j2_name in j2_keys:
         times = inc_dict.get(j2_name, [])
         counts, _ = np.histogram(times, bins=bins)
         df_count[f"J2-{j2_name}_count"] = counts
@@ -233,13 +234,13 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
     print(f"[Saved CSV] {raw_csv}")
     print(f"[Saved CSV] {prob_csv}")
 
-    # gnuplot スクリプト生成と実行（初速度別に8枚）
+    # gnuplot スクリプト生成と実行
     csv_str = prob_csv.resolve().as_posix()
     config_path = (Path.cwd() / "scripts/config.gp").resolve().as_posix()
     load_config = f'load "{config_path}"\n' if Path(config_path).exists() else ""
 
-    for idx, j2_name in enumerate(J2):
-        col_idx = 4 + idx  # 4列目(v020_prob)から11列目(v160_prob)
+    for idx, j2_name in enumerate(j2_keys):
+        col_idx = 4 + idx
         png_path = figures_dir / f"inclination_eq_rc_J2-{j2_name}_{tag}.png"
         png_str = png_path.resolve().as_posix()
 
@@ -249,7 +250,7 @@ set output "{png_str}"
 set datafile separator ","
 set title "共回転半径に達したときの軌道傾斜角: J2 = {j2_name} ({tag})" noenhanced
 set xlabel "inclination [degree]"
-set ylabel "Frequency"
+set ylabel "Probability"
 set xrange [0:180]
 set yrange [0:*]
 set grid ytics lc rgb "#cccccc" dt 2

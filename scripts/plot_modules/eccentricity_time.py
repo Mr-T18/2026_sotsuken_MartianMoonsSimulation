@@ -27,7 +27,7 @@ set angles radians
 set xlabel "時間 t [yr]"
 set ylabel "軌道離心率 e"
 
-set arrow from 0, 0.0151 to 50, 0.0151 nohead lc rgb "#0000cc" dt 2 lw 3
+set arrow from 0, 0.0151 to 50, 0.0151 nohead lc rgb "#cc0000" dt 2 lw 3
 
 scale_rM = {RH_OVER_RM}
 r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM

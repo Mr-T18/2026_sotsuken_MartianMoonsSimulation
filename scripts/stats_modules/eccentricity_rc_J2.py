@@ -159,7 +159,7 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
     j2 = filter_info.get("j2")
     gas = filter_info.get("gas")
     v0 = filter_info.get("v0")
-    tag = f"Obl-{obl:03d}_Gas-{gas}_v0-{v0}"
+    tag = f"Obl-{obl:03d}_Gas-{gas}_v0-{v0:03d}"
 
     stats_dir = Path("stats")
     figures_dir = Path("stats/eccentricity_rc_J2/figure")
