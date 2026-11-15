@@ -1,4 +1,4 @@
-bin_start,bin_end,bin_label,J2-No_prob,J2-Small_prob,J2-Midium_prob,J2-Large_prob
+bin_start,bin_end,bin_label,J2-No_prob,J2-Small_prob,J2-Medium_prob,J2-Large_prob
 0,2,0-2,0.0,0.0,0.10583580613254204,0.22129436325678498
 2,4,2-4,0.0,0.0,0.21266073194856577,0.24425887265135698
 4,6,4-6,0.0,0.0,0.2838773491592483,0.26826722338204595

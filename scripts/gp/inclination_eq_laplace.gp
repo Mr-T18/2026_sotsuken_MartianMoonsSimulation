@@ -7,10 +7,10 @@ set xrange [0:5]
 set yrange [0:35]
 set grid ytics lc rgb "#dddddd" dt 2
 
-J2_Midium = 0.001955
-rL_Large  = r_L(J2_Midium * 10.0)
-rL_Midium = r_L(J2_Midium)
-rL_Small  = r_L(J2_Midium / 10.0)
+J2_Medium = 0.001955
+rL_Large  = r_L(J2_Medium * 10.0)
+rL_Medium = r_L(J2_Medium)
+rL_Small  = r_L(J2_Medium / 10.0)
 
 scale_rM = rH / rM
 r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM
@@ -44,11 +44,11 @@ set label 1 "J2 = 0.01955 (Large)" at graph 0.03, 0.88 font "MS Gothic,13"
 plot "result/parameter/Obl-025_J2-Large_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 5 \
      using (r_norm_rM($2,$3,$4) / rL_Large):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#80cc0000" notitle
 
-# --- 中段: J2 = Midium ---
+# --- 中段: J2 = Medium ---
 set ylabel "傾斜角 i [deg]"
-set label 1 "J2 = 0.001955 (Midium)" at graph 0.03, 0.88 font "MS Gothic,13"
-plot "result/parameter/Obl-025_J2-Midium_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 5 \
-     using (r_norm_rM($2,$3,$4) / rL_Midium):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#8000aa00" notitle
+set label 1 "J2 = 0.001955 (Medium)" at graph 0.03, 0.88 font "MS Gothic,13"
+plot "result/parameter/Obl-025_J2-Medium_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 5 \
+     using (r_norm_rM($2,$3,$4) / rL_Medium):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.35 lc rgb "#8000aa00" notitle
 
 # --- 下段: J2 = Small ---
 set bmargin 4.0
@@ -61,12 +61,12 @@ plot "result/parameter/Obl-025_J2-Small_Gas-Large/out/v020/00/v020_0001.bin" bin
 
 unset multiplot
 
-# 描画順を Small -> Midium -> Large に変更し、every 15 で間引く
+# 描画順を Small -> Medium -> Large に変更し、every 15 で間引く
 plot \
   "result/parameter/Obl-025_J2-Small_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 15 \
     using (r_norm_rM($2,$3,$4) / rL_Small):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.3 lc rgb "#c00000cc" notitle, \
-  "result/parameter/Obl-025_J2-Midium_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 15 \
-    using (r_norm_rM($2,$3,$4) / rL_Midium):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.3 lc rgb "#c000aa00" notitle, \
+  "result/parameter/Obl-025_J2-Medium_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 15 \
+    using (r_norm_rM($2,$3,$4) / rL_Medium):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.3 lc rgb "#c000aa00" notitle, \
   "result/parameter/Obl-025_J2-Large_Gas-Large/out/v020/00/v020_0001.bin" binary format="%7double" every 15 \
     using (r_norm_rM($2,$3,$4) / rL_Large):(inc_deg($1,$2,$3,$4,$5,$6,$7)) with points pt 7 ps 0.3 lc rgb "#b0cc0000" notitle, \
   1/0 with points pt 7 ps 1.5 lc rgb "#cc0000" title "J2=0.01955", \

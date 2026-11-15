@@ -11,7 +11,7 @@ from state import SEC_PER_YEAR, RH_OVER_RM, R_COROT_RM, R_M
 
 # 定数設定
 TIME_UNIT_FACTOR = 1.0
-J2 = ["No", "Small", "Midium", "Large"]
+J2 = ["No", "Small", "Medium", "Large"]
 RECORD_DTYPE = np.dtype(
     [
         ("t", "<f8"),

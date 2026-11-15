@@ -80,7 +80,7 @@ def load_vectors_inertial(bin_path: Path, step_stride: int = 10):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--Obl", type=int, default=25)
-    parser.add_argument("--J2", type=str, default="Midium")
+    parser.add_argument("--J2", type=str, default="Medium")
     parser.add_argument("--Gas", type=str, default="Large")
     args = parser.parse_args()
 

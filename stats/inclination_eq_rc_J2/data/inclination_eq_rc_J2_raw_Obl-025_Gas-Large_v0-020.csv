@@ -1,4 +1,4 @@
-bin_start,bin_end,bin_label,J2-No_count,J2-Small_count,J2-Midium_count,J2-Large_count
+bin_start,bin_end,bin_label,J2-No_count,J2-Small_count,J2-Medium_count,J2-Large_count
 0,2,0-2,0,0,107,212
 2,4,2-4,0,0,215,234
 4,6,4-6,0,0,287,257

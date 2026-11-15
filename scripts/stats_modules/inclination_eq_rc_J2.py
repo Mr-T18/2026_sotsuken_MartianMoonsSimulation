@@ -5,7 +5,7 @@ import pandas as pd
 # 定数設定
 TIME_UNIT_FACTOR = 1.0
 BIN_WIDTH_DEG = 2.0
-J2_ORDER = ["No", "Small", "Midium", "Large"]
+J2_ORDER = ["No", "Small", "Medium", "Large"]
 RECORD_DTYPE = np.dtype(
     [
         ("t", "<f8"),

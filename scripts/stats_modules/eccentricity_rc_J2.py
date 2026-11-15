@@ -4,7 +4,7 @@ import pandas as pd
 
 # 定数設定
 BIN_WIDTH_ECC = 0.02  # 離心率用ビン幅（0.0 〜 1.0 を 50 分割）
-J2 = ["No", "Small", "Midium", "Large"]
+J2 = ["No", "Small", "Medium", "Large"]
 RECORD_DTYPE = np.dtype(
     [
         ("t", "<f8"),
