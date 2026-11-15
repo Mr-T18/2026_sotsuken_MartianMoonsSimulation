@@ -96,14 +96,19 @@ def run_analysis(ctx: dict) -> dict:
             n_records = bin_path.stat().st_size // 56
             m = np.memmap(bin_path, dtype=RECORD_DTYPE, mode="r", shape=(n_records,))
 
+            # 末尾からチャンク単位で逆順に走査し、最初の共回転半径到達ステップを特定
             hit_step = None
             CHUNK_SIZE = 65536
-            for start in range(0, n_records, CHUNK_SIZE):
-                chunk = m[start : min(start + CHUNK_SIZE, n_records)]
 
-                # 距離の2乗が 15 r_M より遠ければスキップ
+            for end in range(n_records, 0, -CHUNK_SIZE):
+                start = max(0, end - CHUNK_SIZE)
+                chunk = m[start:end]
+
                 r_sq = chunk["x"] ** 2 + chunk["y"] ** 2 + chunk["z"] ** 2
                 if np.min(r_sq) > R_FILTER_RH_SQ:
+                    if hit_step is not None:
+                        # 後のチャンクで既に到達を確認済みで、このチャンクは遠方のため確定
+                        break
                     continue
 
                 r_a = compute_semi_major_axis_rM(
@@ -118,7 +123,14 @@ def run_analysis(ctx: dict) -> dict:
                 idx_cross = np.where((~np.isnan(r_a)) & (r_a <= R_COROT_RM))[0]
                 if len(idx_cross) > 0:
                     hit_step = chunk[idx_cross[0]]
-                    break
+                    if idx_cross[0] > 0:
+                        # チャンク途中から到達しているため、ここが最初の到達点で確定
+                        break
+                    # idx_cross[0] == 0 の場合は前のチャンクから既に到達していた可能性があるため遡る
+                else:
+                    if hit_step is not None:
+                        # このチャンクは未到達で、直後のチャンクの先頭で到達していたため確定
+                        break
 
             if hit_step is None:
                 continue

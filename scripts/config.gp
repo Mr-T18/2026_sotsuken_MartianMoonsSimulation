@@ -17,6 +17,13 @@ omegaK = sqrt(G * MS / (MARS_SEMI_MAJOR_AXIS ** 3))
 # Hill半径から火星半径の単位変換
 rH_to_rM(x) = (x * rH) / rM
 
+# km 単位からHill半径単位，火星半径単位への変換
+m_to_rH(x) = x / rH
+m_to_rM(x) = x / rM
+
+# ラプラス半径を求めるぞ
+r_L(J2) = m_to_rM((J2 * (rM**2) * (MARS_SEMI_MAJOR_AXIS**3) * MM / MS)**(1.0/5.0))
+
 # 速度を求めるぞ
 v(vx, vy, vz) = sqrt(vx**2 + vy**2 + vz**2)
 

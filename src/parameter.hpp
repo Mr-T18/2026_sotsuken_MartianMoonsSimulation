@@ -2,7 +2,7 @@
 #define PARAMETER_HPP
 #define _USE_MATH_DEFINES
 
-#define J2_MAGNITUDE "Midium"
+#define J2_MAGNITUDE "Medium"
 #define GAS_MAGNITUDE "Large"
 
 struct Parameter {

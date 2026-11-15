@@ -3,6 +3,8 @@ from pathlib import Path
 # constants.hpp に基づく換算定数 (r_H / r_M)
 RH_OVER_RM = 319.1632070652
 
+J2 = 0.001955
+
 
 def get_gnuplot_script(bin_path: Path, png_path: Path) -> str:
     bin_str = bin_path.as_posix()
@@ -25,8 +27,10 @@ set angles radians
 set xlabel "火星からの距離 r [火星半径]"
 set ylabel "火星赤道面に対する軌道傾斜角 i [deg]"
 
+rL = r_L({J2})
+
 set arrow from 1.0, 0 to 1.0, 35 nohead lc rgb "#cc0000" dt 2 lw 1
-set arrow from 0, 90 to 50, 90 nohead lc rgb "#888888" dt 2 lw 1
+set arrow from rL, 0 to rL, 35 nohead lc rgb "#00cc00" dt 2 lw 3
 
 scale_rM = {RH_OVER_RM}
 r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM
@@ -42,6 +46,7 @@ theta(t) = - omegaK * (t * SEC_PER_YEAR) # Hill座標系における火星の自
 sx(t) = sin(phi) * cos(theta(t))
 sy(t) = sin(phi) * sin(theta(t))
 sz = cos(phi)
+
 
 clamp(v) = (v > 1.0) ? 1.0 : ((v < -1.0) ? -1.0 : v)
 cos_i(t, x, y, z, vx, vy, vz) = (h_norm(x,y,z,vx,vy,vz) > 1e-12) ? \
