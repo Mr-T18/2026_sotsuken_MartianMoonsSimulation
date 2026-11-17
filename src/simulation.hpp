@@ -200,7 +200,7 @@ inline void simulate_single(const InitialCase& ic, const Parameter& param,
     }
 
     // 一時捕獲判定
-    if (t >= 1.88 && !checked_1year) {
+    if (!checked_1year && t >= 1.88) {
       checked_1year = true;
       if (!is_under_ej && calc_jacobi_energy(sat) > 0.0) {
         is_temporary_capture = true;

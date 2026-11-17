@@ -104,9 +104,7 @@ def run_analysis(ctx: dict) -> dict:
         return None
 
     df.columns = ["ID", "v0", "phi0", "zeta0", "N", "year", "result"]
-    captured_ids = df[
-        df["result"].astype(str).str.contains("-Capture") & (df["v0"] == 20.0)
-    ]["ID"].tolist()
+    captured_ids = df[df["result"].astype(str).str.contains("-Capture")]["ID"].tolist()
 
     inc_list = []
     j2_val = ctx.get("j2", "Unknown")

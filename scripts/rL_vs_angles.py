@@ -96,15 +96,14 @@ def compute_series(bin_path: Path, j2_val: float) -> np.ndarray:
 
     valid = h_norm > 1e-12
     safe_h = np.where(valid, h_norm, 1.0)
-    theta_deg = np.where(
-        valid, np.degrees(np.arcsin(np.clip(hz_in / safe_h, -1.0, 1.0))), np.nan
-    )
+    theta_rad = np.where(valid, np.arcsin(np.clip(hz_in / safe_h, -1.0, 1.0)), np.nan)
+    theta_deg = np.degrees(theta_rad)
     phi_rad = np.where(valid, np.arctan2(hy_in, hx_in), np.nan)
     phi_deg = np.degrees(phi_rad)
-    cos_phi = np.cos(phi_rad)
+    costheta_phi = np.cos(theta_rad) * phi_deg
 
-    # 列: [0: r/rL, 1: theta_deg, 2: phi_deg, 3: cos_phi]
-    return np.column_stack([r_norm, theta_deg, phi_deg, cos_phi]).astype("<f8")
+    # 列: [0: r/rL, 1: theta_deg, 2: phi_deg, 3: costheta_phi]
+    return np.column_stack([r_norm, theta_deg, phi_deg, costheta_phi]).astype("<f8")
 
 
 def plot_with_gnuplot(
@@ -152,7 +151,7 @@ def main():
     # 火星自転軸の目標値
     target_theta = 90.0 - OBL_DEG
     target_phi = SPIN_PHI_DEG
-    target_cos_phi = float(np.cos(np.radians(SPIN_PHI_DEG)))
+    target_costheta_phi = float(np.cos(np.radians(target_theta)) * SPIN_PHI_DEG)
 
     for label, j2_val, bin_str, color in J2_CASES:
         bin_path = Path(bin_str)
@@ -165,9 +164,9 @@ def main():
             arr,
             2,
             "軌道法線ベクトル緯度 {/Symbol q} [deg]",
-            "[0:90]",
+            "[60:90]",
             target_theta,
-            f" ",
+            " ",
             OUT_DIR / f"rL_vs_theta_J2-{label}.png",
             color,
         )
@@ -175,20 +174,20 @@ def main():
             arr,
             3,
             "軌道法線ベクトル経度 {/Symbol f} [deg]",
-            "[-180:180]",
+            "[-90:90]",
             target_phi,
-            f" ",
+            " ",
             OUT_DIR / f"rL_vs_phi_J2-{label}.png",
             color,
         )
         plot_with_gnuplot(
             arr,
             4,
-            "cos({/Symbol f})",
-            "[-1.15:1.15]",
-            target_cos_phi,
-            f" ",
-            OUT_DIR / f"rL_vs_cos-phi_J2-{label}.png",
+            "cos({/Symbol q}){/Symbol f} [deg]",
+            "[-30:30]",
+            target_costheta_phi,
+            " ",
+            OUT_DIR / f"rL_vs_costheta-phi_J2-{label}.png",
             color,
         )
         print(f"[Done] J2-{label} ({arr.shape[0]} records)")
