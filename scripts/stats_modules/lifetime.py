@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 # 定数設定
-BIN_WIDTH_YR = 2.0
+BIN_WIDTH_YR = 100.0
 VELOCITIES = [20, 40, 60, 80, 100, 120, 140, 160]
 RECORD_DTYPE = np.dtype(
     [
@@ -39,7 +39,10 @@ def run_analysis(ctx: dict) -> dict:
         return None
 
     df.columns = ["ID", "v0", "phi0", "zeta0", "N", "year", "result"]
-    captured_ids = df[df["result"].astype(str).str.contains("-Capture")]["ID"].tolist()
+    captured_ids = df[
+        df["result"].astype(str).str.contains("-Capture")
+        | df["result"].astype(str).str.contains("-Survive")
+    ]["ID"].tolist()
 
     lifetimes = []
 
@@ -143,18 +146,20 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
         png_str = png_path.resolve().as_posix()
 
         script = f"""\
-{load_config} set terminal pngcairo size 900, 550 font "MS Gothic,18"
-set output "{png_str}"            
+{load_config}
+set terminal pngcairo size 900, 550 font "MS Gothic,18"
+set output "{png_str}"
 set datafile separator ","
-set title "Lifetime: v0 = {v} m/s ({tag})" noenhanced
-set xlabel "Lifetime [yr]"
-set ylabel "Probability"
-set xrange[0:*]
-set yrange[0:*]
+set xlabel "生存時間 [yr]"
+set ylabel "頻度"
+set xrange [0:{10000 + BIN_WIDTH_YR}]
+set yrange [0:*]
+set xtics 0, 2000, 8000 noenhanced
+set xtics add ("10000~" 10000)
 set grid ytics lc rgb "#cccccc" dt 2
 set style fill solid 0.7 border -1
 set boxwidth {BIN_WIDTH_YR}
-plot "{csv_str}" u ($1 + {BIN_WIDTH_YR / 2.0}):{col_idx} every ::1 with boxes lc rgb "#0066CC" notitle            
+plot "{csv_str}" u (($1 >= 10000 ? 10000 : $1) + {BIN_WIDTH_YR / 2.0}):{col_idx} every ::1 smooth frequency with boxes lc rgb "#0066CC" notitle
 """
         run_gnuplot(script)
         print(f"[Saved PNG] {png_path}")
