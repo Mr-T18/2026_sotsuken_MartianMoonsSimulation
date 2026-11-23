@@ -8,15 +8,15 @@ set yrange [0:35]
 set grid ytics lc rgb "#dddddd" dt 2
 set xlabel "火星からの距離 r [r_L]"
 set ylabel "傾斜角 i [deg]"
-set key top right box opaque font "MS Gothic,13"
+set key bottom right box opaque font "MS Gothic,13"
 
 J2_Medium = 0.001955
 rL_Large  = r_L(J2_Medium * 10.0)
 rL_Medium = r_L(J2_Medium)
 rL_Small  = r_L(J2_Medium / 10.0)
-rL_Quarter1 = r_L(J2_Medium**(0.25))
-rL_Quarter2 = r_L(J2_Medium**(0.5))
-rL_Quarter3 = r_L(J2_Medium**(0.75))
+rL_Quarter1 = r_L(J2_Medium* 10.0**(0.25))
+rL_Quarter2 = r_L(J2_Medium* 10.0**(0.5))
+rL_Quarter3 = r_L(J2_Medium * 10.0**(0.75))
 
 scale_rM = rH / rM
 r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM
@@ -40,20 +40,26 @@ set arrow 1 from 1.0, 0 to 1.0, 35 nohead lc rgb "#cccc00" dt 2 lw 2.5
 
 # 3ケースを1枚のグラフに重ねてプロット
 plot "result/ideal/Obl-025_J2-Large_Gas-Large/out/Obl-025_J2-Large_Gas-Large_ideal.bin" binary format="%7double" every 5 \
-         using (r_norm_rM($2,$3,$4) / rL_Large):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
-         with points pt 7 ps 0.35 lc rgb "#cc0000" title "J2 = 0.01955", \
+        using (r_norm_rM($2,$3,$4) / rL_Large):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
+        with points pt 7 ps 0.35 lc rgb "#cc0000" notitle, \
+        NaN with lines lw 2 lc rgb "#cc0000" title "J2 = 0.001955 * 10",\
      "result/ideal/Obl-025_J2-Medium_Gas-Large/out/Obl-025_J2-Medium_Gas-Large_ideal.bin" binary format="%7double" every 5 \
-         using (r_norm_rM($2,$3,$4) / rL_Medium):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
-         with points pt 7 ps 0.35 lc rgb "#00cc00" title "J2 = 0.001955", \
+        using (r_norm_rM($2,$3,$4) / rL_Medium):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
+        with points pt 7 ps 0.35 lc rgb "#00cc00" notitle, \
+        NaN with lines lw 2 lc rgb "#00cc00" title "J2 = 0.001955",\
      "result/ideal/Obl-025_J2-Small_Gas-Large/out/Obl-025_J2-Small_Gas-Large_ideal.bin" binary format="%7double" every 5 \
-         using (r_norm_rM($2,$3,$4) / rL_Small):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
-         with points pt 7 ps 0.35 lc rgb "#0000cc" title "J2 = 0.0001955",\
+        using (r_norm_rM($2,$3,$4) / rL_Small):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
+        with points pt 7 ps 0.35 lc rgb "#0000cc" notitle,\
+        NaN with lines lw 2 lc rgb "#0000cc" title "J2 = 0.001955 * 0.1",\
       "result/ideal/Obl-025_J2-Quarter1_Gas-Large/out/Obl-025_J2-Quarter1_Gas-Large_ideal.bin" binary format="%7double" every 5 \
-         using (r_norm_rM($2,$3,$4) / rL_Quarter1):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
-         with points pt 7 ps 0.35 lc rgb "#aa00aa" title "J2 = 0.001955^{1/4}",\
+        using (r_norm_rM($2,$3,$4) / rL_Quarter1):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
+        with points pt 7 ps 0.35 lc rgb "#aa00aa" notitle,\
+        NaN with lines lw 2 lc rgb "#aa00aa" title "J2 = 0.001955 * 10^{1/4}",\
       "result/ideal/Obl-025_J2-Quarter2_Gas-Large/out/Obl-025_J2-Quarter2_Gas-Large_ideal.bin" binary format="%7double" every 5 \
-         using (r_norm_rM($2,$3,$4) / rL_Quarter2):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
-         with points pt 7 ps 0.35 lc rgb "#00aaaa" title "J2 = 0.001955^{2/4}",\
+        using (r_norm_rM($2,$3,$4) / rL_Quarter2):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
+        with points pt 7 ps 0.35 lc rgb "#00aaaa" notitle,\
+        NaN with lines lw 2 lc rgb "#00aaaa" title "J2 = 0.001955 * 10^{2/4}",\
       "result/ideal/Obl-025_J2-Quarter3_Gas-Large/out/Obl-025_J2-Quarter3_Gas-Large_ideal.bin" binary format="%7double" every 5 \
-         using (r_norm_rM($2,$3,$4) / rL_Quarter3):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
-         with points pt 7 ps 0.35 lc rgb "#f87800" title "J2 = 0.001955^{3/4}"
+        using (r_norm_rM($2,$3,$4) / rL_Quarter3):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
+        with points pt 7 ps 0.35 lc rgb "#f87800" notitle,\
+        NaN with lines lw 2 lc rgb "#f87800" title "J2 = 0.001955 * 10^{3/4}"
