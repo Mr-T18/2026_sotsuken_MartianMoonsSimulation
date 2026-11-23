@@ -14,9 +14,9 @@ J2_Medium = 0.001955
 rL_Large  = r_L(J2_Medium * 10.0)
 rL_Medium = r_L(J2_Medium)
 rL_Small  = r_L(J2_Medium / 10.0)
-rL_Quarter1 = r_L(J2_Medium* 10.0**(0.25))
-rL_Quarter2 = r_L(J2_Medium* 10.0**(0.5))
-rL_Quarter3 = r_L(J2_Medium * 10.0**(0.75))
+rL_Quarter1 = r_L(J2_Medium* 10.0**(-0.25))
+rL_Quarter2 = r_L(J2_Medium* 10.0**(-0.5))
+rL_Quarter3 = r_L(J2_Medium * 10.0**(-0.75))
 
 scale_rM = rH / rM
 r_norm_rM(x, y, z) = sqrt(x*x + y*y + z*z) * scale_rM
