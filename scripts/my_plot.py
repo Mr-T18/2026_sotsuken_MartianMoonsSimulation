@@ -41,15 +41,25 @@ def collect_bin_files(target_path: Path):
     return sorted(bin_files)
 
 
-def convert_bin_to_png_path(bin_path: Path, plot_type: str) -> Path:
+def convert_bin_to_png_path(bin_path: Path, plot_type: str, out_sotsuron: bool) -> Path:
     """out 階層を figures/<plot_type> に置き換えて出力パスを生成"""
+
+    if out_sotsuron:
+        return (
+            Path("C:/j2226/sotsuken/sotsuron/plot/figures")
+            / plot_type
+            / (bin_path.stem + ".png")
+        )
+
     parts = list(bin_path.parts)
     if "out" in parts:
         idx = len(parts) - 1 - parts[::-1].index("out")
         new_parts = parts[:idx] + ["figures", plot_type] + parts[idx + 1 :]
         return Path(*new_parts).with_suffix(".png")
     else:
-        return bin_path.parent / "figures" / plot_type / (bin_path.stem + ".png")
+        png_path = bin_path.parent / "figures" / plot_type / (bin_path.stem + ".png")
+        print(f"png_path = {png_path}")
+        return png_path
 
 
 def worker_task(args):
@@ -121,8 +131,11 @@ def main():
     parser.add_argument(
         "--workers", type=int, default=os.cpu_count() or 4, help="並列プロセス数"
     )
+    parser.add_argument("--out", type=bool, default=None, help="出力モード")
 
     args = parser.parse_args()
+
+    out_sotsuron = args.out
 
     # gnuplotの確認
     gnuplot_bin = find_gnuplot()
@@ -149,7 +162,7 @@ def main():
     tasks = [
         (
             bp,
-            convert_bin_to_png_path(bp, args.plot_type),
+            convert_bin_to_png_path(bp, args.plot_type, out_sotsuron),
             gnuplot_bin,
             script_func,
         )

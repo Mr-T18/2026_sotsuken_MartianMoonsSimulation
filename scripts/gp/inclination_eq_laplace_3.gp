@@ -54,12 +54,12 @@ plot "result/ideal/Obl-025_J2-Large_Gas-Large/out/Obl-025_J2-Large_Gas-Large_ide
       "result/ideal/Obl-025_J2-Quarter1_Gas-Large/out/Obl-025_J2-Quarter1_Gas-Large_ideal.bin" binary format="%7double" every 5 \
         using (r_norm_rM($2,$3,$4) / rL_Quarter1):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
         with points pt 7 ps 0.35 lc rgb "#aa00aa" notitle,\
-        NaN with lines lw 2 lc rgb "#aa00aa" title "J2 = 0.001955 * 10^{1/4}",\
+        NaN with lines lw 2 lc rgb "#aa00aa" title "J2 = 0.001955 * 10^{-1/4}",\
       "result/ideal/Obl-025_J2-Quarter2_Gas-Large/out/Obl-025_J2-Quarter2_Gas-Large_ideal.bin" binary format="%7double" every 5 \
         using (r_norm_rM($2,$3,$4) / rL_Quarter2):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
         with points pt 7 ps 0.35 lc rgb "#00aaaa" notitle,\
-        NaN with lines lw 2 lc rgb "#00aaaa" title "J2 = 0.001955 * 10^{2/4}",\
+        NaN with lines lw 2 lc rgb "#00aaaa" title "J2 = 0.001955 * 10^{-2/4}",\
       "result/ideal/Obl-025_J2-Quarter3_Gas-Large/out/Obl-025_J2-Quarter3_Gas-Large_ideal.bin" binary format="%7double" every 5 \
         using (r_norm_rM($2,$3,$4) / rL_Quarter3):(inc_deg($1,$2,$3,$4,$5,$6,$7)) \
         with points pt 7 ps 0.35 lc rgb "#f87800" notitle,\
-        NaN with lines lw 2 lc rgb "#f87800" title "J2 = 0.001955 * 10^{3/4}"
+        NaN with lines lw 2 lc rgb "#f87800" title "J2 = 0.001955 * 10^{-3/4}"

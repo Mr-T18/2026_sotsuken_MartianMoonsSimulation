@@ -95,15 +95,23 @@ def aggregate_results(results: list, filter_info: dict, run_gnuplot):
     # コマンド引数から識別子を作成
     obl = filter_info.get("obl")
     j2 = filter_info.get("j2")
+    gas = filter_info.get("gas")
     v0 = filter_info.get("v0")
-    tag = f"Obl-{obl:03d}_J2-{j2}_v0-{v0:03d}"
+    out = filter_info.get("out")
+    tag = f"Obl-{obl:03d}_J2-{j2}_v{v0:03d}"
 
-    # 出力先ディレクトリ
+    stats_name = Path(__file__).stem
+    figures_dir = Path(f"stats/{stats_name}/figure")
+    data_dir = Path(f"stats/{stats_name}/data")
+
+    if out is not None:
+        figures_dir = Path(out) / "figures" / "stats" / stats_name
+        data_dir = Path(out) / "figures" / "stats" / stats_name / "data"
+
     stats_dir = Path("stats")
-
-    figures_dir = Path("stats/capture_fall_time_Gas")
     stats_dir.mkdir(parents=True, exist_ok=True)
     figures_dir.mkdir(parents=True, exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     # 100年刻みのビン設定
     max_val = max(all_times)

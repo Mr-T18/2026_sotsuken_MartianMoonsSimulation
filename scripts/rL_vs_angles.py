@@ -12,19 +12,37 @@ J2_CASES = [
         "Large",
         0.01955,
         "result/ideal/Obl-025_J2-Large_Gas-Large/out/Obl-025_J2-Large_Gas-Large_ideal.bin",
-        "#80cc0000",
+        "#cc0000",
     ),
     (
         "Medium",
         0.001955,
         "result/ideal/Obl-025_J2-Medium_Gas-Large/out/Obl-025_J2-Medium_Gas-Large_ideal.bin",
-        "#8000aa00",
+        "#00aa00",
     ),
     (
         "Small",
         0.0001955,
         "result/ideal/Obl-025_J2-Small_Gas-Large/out/Obl-025_J2-Small_Gas-Large_ideal.bin",
-        "#800000cc",
+        "#0000cc",
+    ),
+    (
+        "Quarter1",
+        0.001955 * 10 ** (-0.25),
+        "result/ideal/Obl-025_J2-Quarter1_Gas-Large/out/Obl-025_J2-Quarter1_Gas-Large_ideal.bin",
+        "#aa00aa",
+    ),
+    (
+        "Quarter2",
+        0.001955 * 10 ** (-0.5),
+        "result/ideal/Obl-025_J2-Quarter2_Gas-Large/out/Obl-025_J2-Quarter2_Gas-Large_ideal.bin",
+        "#00aaaa",
+    ),
+    (
+        "Quarter3",
+        0.001955 * 10 ** (-0.75),
+        "result/ideal/Obl-025_J2-Quarter3_Gas-Large/out/Obl-025_J2-Quarter3_Gas-Large_ideal.bin",
+        "#f87800",
     ),
 ]
 
@@ -167,7 +185,7 @@ def main():
             "[60:90]",
             target_theta,
             " ",
-            OUT_DIR / f"rL_vs_theta_J2-{label}.png",
+            OUT_DIR / f"rL_vs_theta/rL_vs_theta_J2-{label}.png",
             color,
         )
         plot_with_gnuplot(
@@ -177,7 +195,7 @@ def main():
             "[-90:90]",
             target_phi,
             " ",
-            OUT_DIR / f"rL_vs_phi_J2-{label}.png",
+            OUT_DIR / f"rL_vs_phi/rL_vs_phi_J2-{label}.png",
             color,
         )
         plot_with_gnuplot(
@@ -187,7 +205,7 @@ def main():
             "[-30:30]",
             target_costheta_phi,
             " ",
-            OUT_DIR / f"rL_vs_costheta-phi_J2-{label}.png",
+            OUT_DIR / f"rL_vs_costheta-phi/rL_vs_costheta-phi_J2-{label}.png",
             color,
         )
         print(f"[Done] J2-{label} ({arr.shape[0]} records)")

@@ -67,7 +67,14 @@ def main():
     parser.add_argument("--v0", type=int, default=None)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--out", type=str, default=None)
+    parser.add_argument("--out_sotsuron", type=bool, default=None)
     args = parser.parse_args()
+
+    out_sotsuron = None
+    if args.out_sotsuron:
+        out_sotsuron = "C:/j2226/sotsuken/sotsuron/"
+    print(f"args.out_sotsuron = {args.out_sotsuron}")
+    print(f"out_sotsuron = {out_sotsuron}")
 
     # モジュール探索
     mod = None
@@ -124,7 +131,7 @@ def main():
         "j2": args.J2,
         "gas": args.Gas,
         "v0": args.v0,
-        "out": args.out,
+        "out": out_sotsuron,
     }
 
     gnuplot_bin = find_gnuplot()
